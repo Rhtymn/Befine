@@ -13,11 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.befine.R
-
-object STATUS {
-    const val OPEN = "open"
-    const val CLOSED = "closed"
-}
+import com.example.befine.utils.STATUS
 
 @Composable
 fun Status(status: String, modifier: Modifier = Modifier) {

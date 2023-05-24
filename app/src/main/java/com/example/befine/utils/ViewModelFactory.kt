@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.befine.repository.RepairShopRepository
 import com.example.befine.screens.client.home.HomeViewModel
-import com.example.befine.screens.client.profile.ProfileViewModel
+import com.example.befine.screens.profile.ProfileViewModel
 
 class ViewModelFactory(private val repository: RepairShopRepository): ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")

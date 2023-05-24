@@ -17,6 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.befine.R
 import com.example.befine.ui.theme.Shapes
+import com.example.befine.utils.STATUS
 
 @Composable
 fun RepairShopItem(name: String, status: String, address: String) {

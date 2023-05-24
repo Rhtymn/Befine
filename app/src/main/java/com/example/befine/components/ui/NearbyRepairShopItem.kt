@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.befine.R
 import com.example.befine.ui.theme.Shapes
+import com.example.befine.utils.STATUS
 
 
 @Composable

@@ -1,4 +1,4 @@
-package com.example.befine.screens.client.profile
+package com.example.befine.screens.profile
 
 import androidx.lifecycle.ViewModel
 

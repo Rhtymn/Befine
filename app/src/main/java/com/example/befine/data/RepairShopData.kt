@@ -1,7 +1,7 @@
 package com.example.befine.data
 
-import com.example.befine.components.ui.STATUS
 import com.example.befine.model.RepairShop
+import com.example.befine.utils.STATUS
 
 object RepairShopData {
     val repairShop = listOf(

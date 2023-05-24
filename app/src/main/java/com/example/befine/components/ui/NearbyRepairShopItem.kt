@@ -3,9 +3,7 @@ package com.example.befine.components.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +21,13 @@ import com.example.befine.ui.theme.Shapes
 
 @Composable
 fun NearbyRepairShopItem(name: String, distance: String, status: String) {
-    Card(Modifier.width(150.dp), shape = Shapes.small) {
+    Card(
+        Modifier
+            .width(150.dp)
+            .padding(end = 16.dp), shape = Shapes.small, colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
+    ) {
         Column() {
             Box(
                 modifier = Modifier
@@ -39,7 +43,8 @@ fun NearbyRepairShopItem(name: String, distance: String, status: String) {
                         .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop
                 )
-                Status(status = status,
+                Status(
+                    status = status,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(bottom = 8.dp, end = 8.dp)

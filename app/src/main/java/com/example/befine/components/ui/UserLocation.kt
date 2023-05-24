@@ -13,8 +13,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun UserLocation(location: String) {
-    Row {
+fun UserLocation(location: String, modifier: Modifier = Modifier) {
+    Row(modifier) {
         Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "")
         Text(
             location,

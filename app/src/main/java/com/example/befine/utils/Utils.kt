@@ -1,4 +1,4 @@
-package com.example.befine.utils
+package com.example.befine.screens.utils
 
 import androidx.compose.ui.unit.dp
 

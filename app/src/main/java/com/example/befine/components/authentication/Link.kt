@@ -1,5 +1,6 @@
 package com.example.befine.components.authentication
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,7 +12,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Link(leftText: String, rightText: String, modifier: Modifier = Modifier) {
+fun Link(
+    leftText: String,
+    rightText: String,
+    modifier: Modifier = Modifier,
+    linkTo: () -> Unit = {}
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
@@ -19,7 +25,9 @@ fun Link(leftText: String, rightText: String, modifier: Modifier = Modifier) {
         Text(leftText)
         Text(
             rightText,
-            modifier = Modifier.padding(start = 4.dp),
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .clickable { linkTo() },
             fontWeight = FontWeight.Bold
         )
     }

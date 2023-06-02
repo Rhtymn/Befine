@@ -1,8 +1,6 @@
 package com.example.befine.screens
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
@@ -22,7 +20,46 @@ import com.example.befine.utils.Screen
 import com.example.befine.R
 
 @Composable
-fun RepairShopSignUpScreen() {
+fun RepairShopSignUpScreen(
+    goToLogin: () -> Unit,
+    goToUserRegister: () -> Unit
+) {
+    Column(
+        Modifier
+            .padding(
+                horizontal = Screen.paddingHorizontal,
+                vertical = Screen.paddingVertical
+            )
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Header(text = "Sign Up")
+        InputField(
+            label = "Email",
+            icon = { Icon(imageVector = Icons.Outlined.Email, contentDescription = "") }
+        )
+        InputField(
+            label = "Repair Shop Name",
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.baseline_store_24),
+                    contentDescription = ""
+                )
+            }
+        )
+        InputField(
+            label = "Password",
+            icon = { Icon(imageVector = Icons.Outlined.Lock, contentDescription = "") }
+        )
+        FilledButton(text = "Continue")
+        Link(leftText = "Sign up as", rightText = "Regular User", linkTo = goToUserRegister)
+        Link(
+            leftText = "Joined us before",
+            rightText = "Login",
+            modifier = Modifier.padding(top = 16.dp),
+            linkTo = goToLogin
+        )
+    }
 }
 
 @Preview
@@ -32,7 +69,15 @@ fun RepairShopSignUpScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            Column(Modifier.padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical)) {
+            Column(
+                Modifier
+                    .padding(
+                        horizontal = Screen.paddingHorizontal,
+                        vertical = Screen.paddingVertical
+                    )
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Header(text = "Sign Up")
                 InputField(
                     label = "Email",

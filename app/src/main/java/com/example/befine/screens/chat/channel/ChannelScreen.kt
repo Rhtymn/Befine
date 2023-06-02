@@ -29,7 +29,8 @@ fun ChannelScreenPreview() {
                 ChatBox(
                     name = "Andy Machisa",
                     datetime = "09.25",
-                    message = "Halo, ada yang bisa kami bantu?"
+                    message = "Halo, ada yang bisa kami bantu?",
+                    numOfUnread = 109
                 )
             }
         }

@@ -24,8 +24,72 @@ import com.example.befine.model.RepairShop
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.Screen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    navigateToProfile: () -> Unit,
+    navigateToChatChannel: () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                title = {
+                    SearchBar(
+                        query = "",
+                        onQueryChange = {},
+                        onSearch = {},
+                        active = false,
+                        onActiveChange = {},
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Filled.Search, contentDescription = "")
+                        },
+                        placeholder = { Text("Search") }
+                    ) {
+
+                    }
+                },
+                windowInsets = WindowInsets(bottom = 8.dp),
+                navigationIcon = {
+                    IconButton(onClick = { navigateToProfile() }) {
+                        Icon(
+                            imageVector = Icons.Outlined.AccountCircle,
+                            contentDescription = "",
+                            tint = Color.Black
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { navigateToChatChannel() }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Email, contentDescription = "",
+                            tint = Color.Black
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            Modifier
+                .padding(innerPadding)
+                .padding(
+                    horizontal = Screen.paddingHorizontal,
+                    vertical = Screen.paddingVertical
+                )
+        ) {
+            UserLocation(
+                location = "User Location",
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            HeaderText(value = "Nearby Repair Shops")
+            NearbyShopList(data = RepairShopData.repairShop)
+            HeaderText(value = "Others")
+            OthersList(data = RepairShopData.repairShop)
+        }
+    }
 }
 
 @Composable

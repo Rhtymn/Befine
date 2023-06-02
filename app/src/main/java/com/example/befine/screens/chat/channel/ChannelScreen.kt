@@ -11,6 +11,19 @@ import com.example.befine.utils.Screen
 
 @Composable
 fun ChannelScreen() {
+    Column(
+        modifier = Modifier.padding(
+            horizontal = Screen.paddingHorizontal,
+            vertical = Screen.paddingVertical
+        )
+    ) {
+        ChatBox(
+            name = "Andy Machisa",
+            datetime = "09.25",
+            message = "Halo, ada yang bisa kami bantu?",
+            numOfUnread = 109
+        )
+    }
 }
 
 @Preview

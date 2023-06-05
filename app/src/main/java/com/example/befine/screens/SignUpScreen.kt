@@ -1,6 +1,9 @@
 package com.example.befine.screens
 
+import android.app.Activity
+import android.os.Handler
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -10,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,14 +22,22 @@ import com.example.befine.components.authentication.FilledButton
 import com.example.befine.components.authentication.Header
 import com.example.befine.components.authentication.InputField
 import com.example.befine.components.authentication.Link
+import com.example.befine.components.ui.FormErrorText
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun SignUpScreen(
     goToLogin: () -> Unit,
-    goToRepairShopRegister: () -> Unit
+    goToRepairShopRegister: () -> Unit,
+    auth: FirebaseAuth = Firebase.auth
 ) {
+    // Context
+    val context = LocalContext.current
+
     // Email Input Field related state
     var email by remember { mutableStateOf("") }
     var isEmailError by remember { mutableStateOf(false) }
@@ -43,6 +55,29 @@ fun SignUpScreen(
 
     // Progress indicator state
     var isLoading by remember { mutableStateOf(false) }
+
+    // Form related state
+    var isFailed by remember { mutableStateOf(false) }
+    var formErrorMsg by remember { mutableStateOf("") }
+
+    fun resetFormState() {
+        isFailed = true
+        formErrorMsg = ""
+    }
+
+    fun resetInputField() {
+        email = ""
+        isEmailError = false
+        emailErrorMsg = ""
+
+        password = ""
+        isPasswordError = false
+        passwordErrorMsg = ""
+
+        fullName = ""
+        isFullNameError = false
+        fullNameErrorMsg = ""
+    }
 
     val signUpHandler: () -> Unit = {
         try {
@@ -73,27 +108,53 @@ fun SignUpScreen(
             // Checking error availability
             if (!isEmailError && !isPasswordError && !isFullNameError) {
                 Log.d("Sign Up Screen", "$email $fullName $password")
+
+                // Sign up process
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(context as Activity) { task ->
+                        if (task.isSuccessful) {
+                            // Sign in success, update UI with the signed-in user's information
+                            resetInputField()
+
+                            Toast.makeText(context, "Sign Up Success", Toast.LENGTH_SHORT)
+                                .show()
+
+                            @Suppress("DEPRECATION")
+                            Handler().postDelayed(
+                                {
+                                    goToLogin()
+                                }, 2000
+                            )
+
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            isFailed = true
+                            formErrorMsg = task.exception?.message.toString()
+                        }
+                        isLoading = false
+                    }
             }
         } catch (e: Exception) {
             Log.d("Sign Up Screen", e.message.toString())
-        } finally {
-            isLoading = false
         }
     }
 
     fun onChangeEmailField(value: String) {
         if (isEmailError) isEmailError = false
         email = value
+        resetFormState()
     }
 
     fun onChangePasswordField(value: String) {
         if (isPasswordError) isPasswordError = false
         password = value
+        resetFormState()
     }
 
     fun onChangeFullNameField(value: String) {
         if (isFullNameError) isFullNameError = false
         fullName = value
+        resetFormState()
     }
 
     Column(
@@ -133,7 +194,10 @@ fun SignUpScreen(
             errorMessage = passwordErrorMsg,
             icon = { Icon(imageVector = Icons.Outlined.Person, contentDescription = "") }
         )
-        FilledButton(text = "Continue", isLoading = isLoading, onClick = signUpHandler)
+        if (isFailed) {
+            FormErrorText(errorMsg = formErrorMsg)
+        }
+        FilledButton(text = "Continue", isLoading = isLoading, onClick = { signUpHandler() })
         Link(
             leftText = "Sign up as",
             rightText = "Repair Shop Owner",
@@ -155,9 +219,7 @@ fun SignUpScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            SignUpScreen(goToLogin = { /*TODO*/ }) {
-
-            }
+            SignUpScreen(goToLogin = { /*TODO*/ }, goToRepairShopRegister = { /*TODO*/ })
         }
     }
 }

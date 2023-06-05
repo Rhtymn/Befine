@@ -12,6 +12,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
+fun SupportingText(errorMessage: String) {
+    Text(
+        text = errorMessage,
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.error
+    )
+}
+
+@Composable
 fun InputField(
     modifier: Modifier = Modifier,
     value: String,
@@ -24,26 +33,33 @@ fun InputField(
     icon: @Composable (() -> Unit)? = null,
 ) {
     if (icon != null) {
-        OutlinedTextField(
-            value = value,
-            isError = isError,
-            onValueChange = onValueChange,
-            visualTransformation = visualTransformation,
-            keyboardOptions = keyboardOptions,
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            supportingText = {
-                if (isError) {
-                    Text(
-                        text = errorMessage,
-                        modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            leadingIcon = { icon() },
-            label = { Text(label) }
-        )
+        if (isError) {
+            OutlinedTextField(
+                value = value,
+                isError = true,
+                onValueChange = onValueChange,
+                visualTransformation = visualTransformation,
+                keyboardOptions = keyboardOptions,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                supportingText = { SupportingText(errorMessage = errorMessage) },
+                leadingIcon = { icon() },
+                label = { Text(label) }
+            )
+        } else {
+            OutlinedTextField(
+                value = value,
+                isError = false,
+                onValueChange = onValueChange,
+                visualTransformation = visualTransformation,
+                keyboardOptions = keyboardOptions,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                leadingIcon = { icon() },
+                label = { Text(label) }
+            )
+        }
     }
 }

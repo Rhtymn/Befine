@@ -23,18 +23,21 @@ import com.example.befine.components.authentication.Header
 import com.example.befine.components.authentication.InputField
 import com.example.befine.components.authentication.Link
 import com.example.befine.components.ui.FormErrorText
+import com.example.befine.firebase.Auth
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
-import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 @Composable
 fun SignUpScreen(
     goToLogin: () -> Unit,
     goToRepairShopRegister: () -> Unit,
-    auth: FirebaseAuth = Firebase.auth
+    auth: FirebaseAuth = Auth.getInstance().getAuth(),
+    db: FirebaseFirestore = Firebase.firestore
 ) {
     // Context
     val context = LocalContext.current

@@ -22,16 +22,16 @@ import com.example.befine.components.authentication.FilledButton
 import com.example.befine.components.authentication.InputField
 import com.example.befine.components.authentication.Link
 import com.example.befine.components.ui.FormErrorText
+import com.example.befine.firebase.Auth
 import com.example.befine.utils.*
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 
 @Composable
 fun LoginScreen(
     goToUserRegister: () -> Unit,
-    auth: FirebaseAuth = Firebase.auth
+    auth: FirebaseAuth = Auth.getInstance().getAuth()
 ) {
     // Context
     val context = LocalContext.current
@@ -104,11 +104,12 @@ fun LoginScreen(
                         } else {
                             // If sign in fails, display a message to the user
                             isFailed = true
-                            formErrorMsg = if (task.exception is FirebaseAuthInvalidUserException) {
-                                "Invalid email or password"
-                            } else {
-                                "Server is down, please try again later"
-                            }
+                            formErrorMsg =
+                                if (task.exception is FirebaseAuthInvalidUserException || task.exception is FirebaseAuthInvalidCredentialsException) {
+                                    "Invalid email or password"
+                                } else {
+                                    "Server is down, please try again later"
+                                }
                         }
                         isLoading = false
                     }

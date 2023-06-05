@@ -1,6 +1,8 @@
 package com.example.befine.screens
 
+import android.app.Activity
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,16 +21,17 @@ import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.components.authentication.FilledButton
 import com.example.befine.components.authentication.InputField
 import com.example.befine.components.authentication.Link
-import com.example.befine.data.AuthData
-import com.example.befine.preferences.PreferenceDatastore
+import com.example.befine.components.ui.FormErrorText
 import com.example.befine.utils.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun LoginScreen(
-    goToUserRegister: () -> Unit
+    goToUserRegister: () -> Unit,
+    auth: FirebaseAuth = Firebase.auth
 ) {
     // Context
     val context = LocalContext.current
@@ -46,8 +49,24 @@ fun LoginScreen(
     // Progress Indicator state
     var isLoading by remember { mutableStateOf(false) }
 
-    // Auth Preference Datastore
-    val authPreference = PreferenceDatastore(context)
+    // Form related state
+    var isFailed by remember { mutableStateOf(false) }
+    var formErrorMsg by remember { mutableStateOf("") }
+
+    fun resetFormState() {
+        isFailed = false
+        formErrorMsg = ""
+    }
+
+    fun resetInputField() {
+        email = ""
+        isEmailError = false
+        emailErrorMsg = ""
+
+        password = ""
+        isPasswordError = false
+        passwordErrorMsg = ""
+    }
 
     val loginHandler: () -> Unit = {
         try {
@@ -69,27 +88,46 @@ fun LoginScreen(
                 passwordErrorMsg = PASSWORD_ERROR.MIN_CHARS
             })
 
+            // Checking error availability
             if (!isEmailError && !isPasswordError) {
-                // Save userId & email to AuthPreference
-                CoroutineScope(Dispatchers.IO).launch {
-                    authPreference.setAuthPreference(AuthData("ID01", email))
-                }
+
+                // Sign in process
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(context as Activity) { task ->
+                        if (task.isSuccessful) {
+                            // Sign in success, update UI with the signed-in user's information
+                            resetInputField()
+
+                            Toast.makeText(context, "Login Success", Toast.LENGTH_SHORT)
+                                .show()
+
+                        } else {
+                            // If sign in fails, display a message to the user
+                            isFailed = true
+                            formErrorMsg = if (task.exception is FirebaseAuthInvalidUserException) {
+                                "Invalid email or password"
+                            } else {
+                                "Server is down, please try again later"
+                            }
+                        }
+                        isLoading = false
+                    }
 
             }
         } catch (e: Exception) {
             Log.d("LOGIN", e.message.toString())
-        } finally {
-            isLoading = false
         }
     }
 
     fun onChangeEmailField(value: String) {
         if (isEmailError) isEmailError = false
+        if (isFailed) resetFormState()
         email = value
     }
 
     fun onChangePasswordField(value: String) {
         if (isPasswordError) isPasswordError = false
+        if (isFailed) resetFormState()
         password = value
     }
 
@@ -121,6 +159,9 @@ fun LoginScreen(
             errorMessage = passwordErrorMsg,
             icon = { Icon(imageVector = Icons.Outlined.Lock, contentDescription = "") }
         )
+        if (isFailed) {
+            FormErrorText(errorMsg = formErrorMsg)
+        }
         FilledButton(text = "Login", isLoading = isLoading, onClick = loginHandler)
         Link(leftText = "New to Befine?", rightText = "Register", linkTo = goToUserRegister)
     }
@@ -133,8 +174,7 @@ fun LoginScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            LoginScreen {
-            }
+            LoginScreen(goToUserRegister = { /*TODO*/ })
         }
     }
 }

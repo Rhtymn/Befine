@@ -26,6 +26,7 @@ import com.example.befine.components.ui.FormErrorText
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -129,7 +130,12 @@ fun SignUpScreen(
                         } else {
                             // If sign in fails, display a message to the user.
                             isFailed = true
-                            formErrorMsg = task.exception?.message.toString()
+                            formErrorMsg =
+                                if (task.exception is FirebaseAuthException) {
+                                    "Email already in use"
+                                } else {
+                                    "Server is down, please try again later"
+                                }
                         }
                         isLoading = false
                     }

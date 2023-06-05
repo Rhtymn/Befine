@@ -74,18 +74,18 @@ fun LoginScreen(
 
             emailValidation(email, callbackWhenEmpty = {
                 isEmailError = true
-                emailErrorMsg = INPUT_FIELD_ERROR.REQUIRED
+                emailErrorMsg = InputFieldError.REQUIRED
             }, callbackWhenInvalidFormat = {
                 isEmailError = true
-                emailErrorMsg = EMAIL_ERROR.INVALID_FORMAT
+                emailErrorMsg = EmailError.INVALID_FORMAT
             })
 
             passwordValidation(password, callbackWhenEmpty = {
                 isPasswordError = true
-                passwordErrorMsg = INPUT_FIELD_ERROR.REQUIRED
+                passwordErrorMsg = InputFieldError.REQUIRED
             }, callbackWhenLessThanEightChar = {
                 isPasswordError = true
-                passwordErrorMsg = PASSWORD_ERROR.MIN_CHARS
+                passwordErrorMsg = PasswordError.MIN_CHARS
             })
 
             // Checking error availability
@@ -106,9 +106,9 @@ fun LoginScreen(
                             isFailed = true
                             formErrorMsg =
                                 if (task.exception is FirebaseAuthInvalidUserException || task.exception is FirebaseAuthInvalidCredentialsException) {
-                                    "Invalid email or password"
+                                    LoginError.INVALID
                                 } else {
-                                    "Server is down, please try again later"
+                                    LoginError.DEFAULT
                                 }
                         }
                         isLoading = false

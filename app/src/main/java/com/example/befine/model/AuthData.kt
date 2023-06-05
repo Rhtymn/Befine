@@ -1,4 +1,4 @@
-package com.example.befine.data
+package com.example.befine.model
 
 data class AuthData(
     val userId: String,

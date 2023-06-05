@@ -27,15 +27,19 @@ import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.R
 import com.example.befine.components.ui.FormErrorText
 import com.example.befine.firebase.Auth
+import com.example.befine.model.UserData
+import com.example.befine.repository.UsersRepository
 import com.example.befine.utils.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.example.befine.model.ROLE.REPAIR_SHOP_OWNER
 
 @Composable
 fun RepairShopSignUpScreen(
     goToLogin: () -> Unit,
     goToUserRegister: () -> Unit,
-    auth: FirebaseAuth = Auth.getInstance().getAuth()
+    auth: FirebaseAuth = Auth.getInstance().getAuth(),
+    usersRepository: UsersRepository = UsersRepository.getInstance()
 ) {
     // Context
     val context = LocalContext.current
@@ -88,23 +92,23 @@ fun RepairShopSignUpScreen(
             // Repair shop name validation
             inputFieldValidation(repairShopName, callbackWhenEmpty = {
                 isRepairShopNameError = true
-                repairShopErrorMsg = INPUT_FIELD_ERROR.REQUIRED
+                repairShopErrorMsg = InputFieldError.REQUIRED
             })
 
             emailValidation(email, callbackWhenEmpty = {
                 isEmailError = true
-                emailErrorMsg = INPUT_FIELD_ERROR.REQUIRED
+                emailErrorMsg = InputFieldError.REQUIRED
             }, callbackWhenInvalidFormat = {
                 isEmailError = true
-                emailErrorMsg = EMAIL_ERROR.INVALID_FORMAT
+                emailErrorMsg = EmailError.INVALID_FORMAT
             })
 
             passwordValidation(password, callbackWhenEmpty = {
                 isPasswordError = true
-                passwordErrorMsg = INPUT_FIELD_ERROR.REQUIRED
+                passwordErrorMsg = InputFieldError.REQUIRED
             }, callbackWhenLessThanEightChar = {
                 isPasswordError = true
-                passwordErrorMsg = PASSWORD_ERROR.MIN_CHARS
+                passwordErrorMsg = PasswordError.MIN_CHARS
             })
 
             if (!isEmailError && !isPasswordError && !isRepairShopNameError) {
@@ -115,6 +119,20 @@ fun RepairShopSignUpScreen(
                     .addOnCompleteListener(context as Activity) { task ->
                         if (task.isSuccessful) {
                             // Sign in success, update UI with the signed-in user's information
+                            if (auth.currentUser != null) {
+                                val user = UserData(
+                                    name = repairShopName,
+                                    role = REPAIR_SHOP_OWNER.name
+                                )
+
+                                // Create users in firestore database
+                                usersRepository.createUser(auth.currentUser!!.uid, user) {
+                                    // Callback when failed
+                                    auth.currentUser!!.delete()
+                                    isFailed = true
+                                    formErrorMsg = SignUpError.FAILED
+                                }
+                            }
                             resetInputField()
 
                             Toast.makeText(context, "Sign Up Success", Toast.LENGTH_SHORT)
@@ -131,9 +149,9 @@ fun RepairShopSignUpScreen(
                             isFailed = true
                             formErrorMsg =
                                 if (task.exception is FirebaseAuthException) {
-                                    "Email already in use"
+                                    SignUpError.EMAIL_IN_USE
                                 } else {
-                                    "Server is down, please try again later"
+                                    SignUpError.DEFAULT
                                 }
                         }
                         isLoading = false

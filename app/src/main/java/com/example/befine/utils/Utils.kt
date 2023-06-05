@@ -17,16 +17,27 @@ object ROLE {
     const val REPAIR_SHOP_OWNER = "repair_shop_owner"
 }
 
-object INPUT_FIELD_ERROR {
+object InputFieldError {
     const val REQUIRED = "Required"
 }
 
-object EMAIL_ERROR {
+object EmailError {
     const val INVALID_FORMAT = "Invalid email format"
 }
 
-object PASSWORD_ERROR {
+object PasswordError {
     const val MIN_CHARS = "Minimum 8 characters"
+}
+
+object SignUpError {
+    const val FAILED = "Register failed, try again later"
+    const val EMAIL_IN_USE = "Email already in use"
+    const val DEFAULT = "Server is down, please try again later"
+}
+
+object LoginError {
+    const val INVALID = "Invalid email or password"
+    const val DEFAULT = "Server is down, please try again later"
 }
 
 fun inputFieldValidation(value: String, callbackWhenEmpty: () -> Unit) {

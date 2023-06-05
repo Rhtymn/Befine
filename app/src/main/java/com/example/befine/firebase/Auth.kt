@@ -5,7 +5,6 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 class Auth private constructor() {
-
     companion object {
         @Volatile
         private var instance: Auth? = null

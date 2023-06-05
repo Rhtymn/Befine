@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.befine.data.AuthData
+import com.example.befine.model.AuthData
 import kotlinx.coroutines.flow.map
 val Context.datastore: DataStore<Preferences> by preferencesDataStore("AUTH_PREFERENCE")
 

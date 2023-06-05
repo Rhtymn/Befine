@@ -61,7 +61,7 @@ fun SignUpScreen(
     var formErrorMsg by remember { mutableStateOf("") }
 
     fun resetFormState() {
-        isFailed = true
+        isFailed = false
         formErrorMsg = ""
     }
 
@@ -141,20 +141,20 @@ fun SignUpScreen(
 
     fun onChangeEmailField(value: String) {
         if (isEmailError) isEmailError = false
+        if (isFailed) resetFormState()
         email = value
-        resetFormState()
     }
 
     fun onChangePasswordField(value: String) {
         if (isPasswordError) isPasswordError = false
+        if (isFailed) resetFormState()
         password = value
-        resetFormState()
     }
 
     fun onChangeFullNameField(value: String) {
         if (isFullNameError) isFullNameError = false
+        if (isFailed) resetFormState()
         fullName = value
-        resetFormState()
     }
 
     Column(

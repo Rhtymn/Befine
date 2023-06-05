@@ -7,5 +7,5 @@ data class RepairShopData(
     val latitude: String = "",
     val longitude: String = "",
     val phone_number: String = "",
-    val photo: String = "",
+    val photo: String = "default.jpg",
 )

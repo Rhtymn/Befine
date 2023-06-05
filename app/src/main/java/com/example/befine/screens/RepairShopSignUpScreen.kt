@@ -26,20 +26,23 @@ import com.example.befine.components.authentication.Link
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.R
 import com.example.befine.components.ui.FormErrorText
+import com.example.befine.model.RepairShopData
 import com.example.befine.firebase.Auth
 import com.example.befine.model.UserData
-import com.example.befine.repository.UsersRepository
 import com.example.befine.utils.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.example.befine.model.ROLE.REPAIR_SHOP_OWNER
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun RepairShopSignUpScreen(
     goToLogin: () -> Unit,
     goToUserRegister: () -> Unit,
     auth: FirebaseAuth = Auth.getInstance().getAuth(),
-    usersRepository: UsersRepository = UsersRepository.getInstance()
+    db: FirebaseFirestore = Firebase.firestore
 ) {
     // Context
     val context = LocalContext.current
@@ -124,14 +127,23 @@ fun RepairShopSignUpScreen(
                                     name = repairShopName,
                                     role = REPAIR_SHOP_OWNER.name
                                 )
+                                val repairShopData = RepairShopData(userId = auth.currentUser!!.uid)
 
-                                // Create users in firestore database
-                                usersRepository.createUser(auth.currentUser!!.uid, user) {
-                                    // Callback when failed
-                                    auth.currentUser!!.delete()
+                                val usersRef =
+                                    db.collection("users").document(auth.currentUser!!.uid)
+                                val repairShopsRef = db.collection("repairShops")
+
+                                db.runBatch {
+                                    // Create users in firestore database
+                                    usersRef.set(user)
+
+                                    // Create repairShops in firestore data
+                                    repairShopsRef.add(repairShopData)
+                                }.addOnFailureListener {
                                     isFailed = true
                                     formErrorMsg = SignUpError.FAILED
                                 }
+
                             }
                             resetInputField()
 

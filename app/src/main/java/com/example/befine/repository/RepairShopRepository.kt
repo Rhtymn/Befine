@@ -2,8 +2,11 @@ package com.example.befine.repository
 
 import com.example.befine.data.RepairShopData
 import com.example.befine.model.RepairShop
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
-class RepairShopRepository {
+class RepairShopRepository(val db: FirebaseFirestore = Firebase.firestore) {
     fun getRepairShops(): List<RepairShop> {
         return RepairShopData.repairShop
     }
@@ -18,5 +21,14 @@ class RepairShopRepository {
                     instance = this
                 }
             }
+    }
+
+    fun createRepairShop(
+        repairShop: RepairShopData,
+        callbackWhenFailed: () -> Unit
+    ) {
+        db.collection("repairShops").add(repairShop).addOnFailureListener {
+            callbackWhenFailed()
+        }
     }
 }

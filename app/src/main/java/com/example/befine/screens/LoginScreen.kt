@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,12 +19,20 @@ import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.components.authentication.FilledButton
 import com.example.befine.components.authentication.InputField
 import com.example.befine.components.authentication.Link
+import com.example.befine.data.AuthData
+import com.example.befine.preferences.PreferenceDatastore
 import com.example.befine.utils.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
     goToUserRegister: () -> Unit
 ) {
+    // Context
+    val context = LocalContext.current
+
     // Email Input Field related state
     var email by remember { mutableStateOf("") }
     var isEmailError by remember { mutableStateOf(false) }
@@ -36,6 +45,9 @@ fun LoginScreen(
 
     // Progress Indicator state
     var isLoading by remember { mutableStateOf(false) }
+
+    // Auth Preference Datastore
+    val authPreference = PreferenceDatastore(context)
 
     val loginHandler: () -> Unit = {
         try {
@@ -58,7 +70,11 @@ fun LoginScreen(
             })
 
             if (!isEmailError && !isPasswordError) {
-                Log.d("LOGIN", "${email} $password")
+                // Save userId & email to AuthPreference
+                CoroutineScope(Dispatchers.IO).launch {
+                    authPreference.setAuthPreference(AuthData("ID01", email))
+                }
+
             }
         } catch (e: Exception) {
             Log.d("LOGIN", e.message.toString())

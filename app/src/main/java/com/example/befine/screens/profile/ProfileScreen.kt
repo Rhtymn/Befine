@@ -6,7 +6,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -16,20 +16,39 @@ import com.example.befine.components.ui.profile.ActionButton
 import com.example.befine.components.ui.profile.ProfileInformation
 import com.example.befine.components.ui.profile.actionButtonIconModifier
 import com.example.befine.firebase.Auth
+import com.example.befine.model.User
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.ROLE
 import com.example.befine.utils.Screen
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun ProfileScreen(
     role: String = ROLE.CLIENT,
     navigateToLogin: () -> Unit,
-    auth: FirebaseAuth = Auth.getInstance().getAuth()
+    auth: FirebaseAuth = Auth.getInstance().getAuth(),
+    db: FirebaseFirestore = Firebase.firestore
 ) {
+    var username by remember { mutableStateOf("") }
+    val email = if (auth.currentUser != null) auth.currentUser!!.email.toString() else ""
+
+    LaunchedEffect(true) {
+        val user: User? =
+            db.collection("users").document(auth.currentUser!!.uid).get().await().toObject<User>()
+        if (user != null) {
+            username = user.name.toString()
+        }
+    }
+
     val logoutHandler = {
-        auth.signOut()
         navigateToLogin()
+        auth.signOut()
     }
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -40,7 +59,7 @@ fun ProfileScreen(
                 vertical = Screen.paddingVertical
             )
         ) {
-            ProfileInformation(name = "Andy Machisa", email = "machisa@gmail.com")
+            ProfileInformation(name = username, email = email)
             Divider(modifier = Modifier.padding(vertical = 16.dp))
             if (role == "REPAIR_SHOP_OWNER") {
                 ActionButton(

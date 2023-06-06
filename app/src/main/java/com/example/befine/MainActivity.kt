@@ -10,9 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.befine.navigation.Screen
 import com.example.befine.screens.LoginScreen
 import com.example.befine.screens.RepairShopSignUpScreen
@@ -20,6 +22,7 @@ import com.example.befine.screens.SignUpScreen
 import com.example.befine.screens.chat.channel.ChannelScreen
 import com.example.befine.screens.client.HomeScreen
 import com.example.befine.screens.profile.ProfileScreen
+import com.example.befine.screens.repairshopowners.RepairShopHome
 import com.example.befine.ui.theme.BefineTheme
 
 class MainActivity : ComponentActivity() {
@@ -50,40 +53,53 @@ fun BefineApp(
     }
 
     fun goToRegularHomeScreen() = { -> navController.navigate(Screen.Home.route) }
+    fun goToRepairShopHome() = { -> navController.navigate(Screen.RepairShopHome.route) }
     fun goToRegisterUser() = { ->
         navController.navigate(Screen.RegisterUser.route)
+    }
+
+    val goToProfile: (role: String) -> Unit = { role ->
+        navController.navigate(Screen.Profile.createRoute(role))
     }
 
     NavHost(navController = navController, startDestination = Screen.Login.route) {
         composable(Screen.Login.route) {
             LoginScreen(
-                goToUserRegister = goToRegisterUser(),
-                goToRegularHomeScreen = goToRegularHomeScreen()
+                navigateToUserRegister = goToRegisterUser(),
+                navigateToRegularHome = goToRegularHomeScreen(),
+                navigateToRepairShopHome = goToRepairShopHome()
             )
         }
         composable(Screen.RegisterUser.route) {
             SignUpScreen(
-                goToLogin = goToLogin(),
-                goToRepairShopRegister = { navController.navigate(Screen.RegisterRepairShop.route) }
+                navigateToLogin = goToLogin(),
+                navigateToRepairShopRegister = { navController.navigate(Screen.RegisterRepairShop.route) }
             )
         }
         composable(Screen.RegisterRepairShop.route) {
             RepairShopSignUpScreen(
-                goToLogin = goToLogin(),
-                goToUserRegister = goToRegisterUser()
+                navigateToLogin = goToLogin(),
+                navigateToUserRegister = goToRegisterUser()
             )
         }
         composable(Screen.Home.route) {
             HomeScreen(
-                navigateToProfile = { navController.navigate(Screen.Profile.route) },
+                navigateToProfile = { goToProfile("REGULAR_USER") },
                 navigateToChatChannel = { navController.navigate(Screen.ChatChannel.route) }
             )
         }
-        composable(Screen.Profile.route) {
-            ProfileScreen(goToLoginScreen = goToLogin())
+        composable(
+            Screen.Profile.route,
+            arguments = listOf(navArgument("role") { type = NavType.StringType })
+        ) {
+            val role = it.arguments?.getString("role")
+            ProfileScreen(navigateToLogin = goToLogin(), role = role.toString())
         }
         composable(Screen.ChatChannel.route) {
             ChannelScreen()
+        }
+        composable(Screen.RepairShopHome.route) {
+            RepairShopHome(navigateToProfile = { goToProfile("REPAIR_SHOP_OWNER") })
         }
     }
 }

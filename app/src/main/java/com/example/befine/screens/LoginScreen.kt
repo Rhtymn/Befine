@@ -23,8 +23,6 @@ import com.example.befine.components.authentication.InputField
 import com.example.befine.components.authentication.Link
 import com.example.befine.components.ui.FormErrorText
 import com.example.befine.firebase.Auth
-import com.example.befine.model.User
-import com.example.befine.repository.UsersRepository
 import com.example.befine.utils.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -35,9 +33,10 @@ import com.google.firebase.ktx.Firebase
 
 @Composable
 fun LoginScreen(
-    goToUserRegister: () -> Unit,
+    navigateToUserRegister: () -> Unit,
     auth: FirebaseAuth = Auth.getInstance().getAuth(),
-    goToRegularHomeScreen: () -> Unit,
+    navigateToRegularHome: () -> Unit,
+    navigateToRepairShopHome: () -> Unit,
     db: FirebaseFirestore = Firebase.firestore
 ) {
     // Context
@@ -108,7 +107,9 @@ fun LoginScreen(
                             db.collection("users").document(auth.currentUser!!.uid).get()
                                 .addOnSuccessListener {
                                     if (it.get("role") == "REGULAR_USER") {
-                                        goToRegularHomeScreen()
+                                        navigateToRegularHome()
+                                    } else if (it.get("role") == "REPAIR_SHOP_OWNER") {
+                                        navigateToRepairShopHome()
                                     } else {
                                         Toast.makeText(
                                             context,
@@ -186,7 +187,7 @@ fun LoginScreen(
             FormErrorText(errorMsg = formErrorMsg)
         }
         FilledButton(text = "Login", isLoading = isLoading, onClick = loginHandler)
-        Link(leftText = "New to Befine?", rightText = "Register", linkTo = goToUserRegister)
+        Link(leftText = "New to Befine?", rightText = "Register", linkTo = navigateToUserRegister)
     }
 }
 
@@ -197,7 +198,10 @@ fun LoginScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            LoginScreen(goToUserRegister = { /*TODO*/ }, goToRegularHomeScreen = { /*TODO*/ })
+            LoginScreen(
+                navigateToUserRegister = { /*TODO*/ },
+                navigateToRegularHome = { /*TODO*/ },
+                navigateToRepairShopHome = { /*TODO*/ })
         }
     }
 }

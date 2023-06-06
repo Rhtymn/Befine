@@ -39,8 +39,8 @@ import com.google.firebase.ktx.Firebase
 
 @Composable
 fun RepairShopSignUpScreen(
-    goToLogin: () -> Unit,
-    goToUserRegister: () -> Unit,
+    navigateToLogin: () -> Unit,
+    navigateToUserRegister: () -> Unit,
     auth: FirebaseAuth = Auth.getInstance().getAuth(),
     db: FirebaseFirestore = Firebase.firestore
 ) {
@@ -157,7 +157,7 @@ fun RepairShopSignUpScreen(
                             @Suppress("DEPRECATION")
                             Handler().postDelayed(
                                 {
-                                    goToLogin()
+                                    navigateToLogin()
                                 }, 2000
                             )
                         } else {
@@ -242,12 +242,12 @@ fun RepairShopSignUpScreen(
             FormErrorText(errorMsg = formErrorMsg)
         }
         FilledButton(text = "Continue", isLoading = isLoading, onClick = signUpHandler)
-        Link(leftText = "Sign up as", rightText = "Regular User", linkTo = goToUserRegister)
+        Link(leftText = "Sign up as", rightText = "Regular User", linkTo = navigateToUserRegister)
         Link(
             leftText = "Joined us before",
             rightText = "Login",
             modifier = Modifier.padding(top = 16.dp),
-            linkTo = goToLogin
+            linkTo = navigateToLogin
         )
     }
 }
@@ -259,7 +259,7 @@ fun RepairShopSignUpScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            RepairShopSignUpScreen(goToLogin = { /*TODO*/ }, goToUserRegister = { /*TODO*/ })
+            RepairShopSignUpScreen(navigateToLogin = { /*TODO*/ }, navigateToUserRegister = { /*TODO*/ })
         }
     }
 }

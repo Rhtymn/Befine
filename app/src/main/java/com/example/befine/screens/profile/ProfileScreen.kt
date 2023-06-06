@@ -24,12 +24,12 @@ import com.google.firebase.auth.FirebaseAuth
 @Composable
 fun ProfileScreen(
     role: String = ROLE.CLIENT,
-    goToLoginScreen: () -> Unit,
+    navigateToLogin: () -> Unit,
     auth: FirebaseAuth = Auth.getInstance().getAuth()
 ) {
     val logoutHandler = {
         auth.signOut()
-        goToLoginScreen()
+        navigateToLogin()
     }
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -42,7 +42,7 @@ fun ProfileScreen(
         ) {
             ProfileInformation(name = "Andy Machisa", email = "machisa@gmail.com")
             Divider(modifier = Modifier.padding(vertical = 16.dp))
-            if (role == ROLE.REPAIR_SHOP_OWNER) {
+            if (role == "REPAIR_SHOP_OWNER") {
                 ActionButton(
                     icon = {
                         Icon(
@@ -73,6 +73,6 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenPreview() {
     BefineTheme {
-        ProfileScreen(goToLoginScreen = { /*TODO*/ })
+        ProfileScreen(navigateToLogin = { /*TODO*/ })
     }
 }

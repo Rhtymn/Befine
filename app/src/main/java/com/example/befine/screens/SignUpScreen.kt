@@ -34,8 +34,8 @@ import com.google.firebase.auth.FirebaseAuthException
 
 @Composable
 fun SignUpScreen(
-    goToLogin: () -> Unit,
-    goToRepairShopRegister: () -> Unit,
+    navigateToLogin: () -> Unit,
+    navigateToRepairShopRegister: () -> Unit,
     auth: FirebaseAuth = Auth.getInstance().getAuth(),
     usersRepository: UsersRepository = UsersRepository.getInstance()
 ) {
@@ -140,7 +140,7 @@ fun SignUpScreen(
                             @Suppress("DEPRECATION")
                             Handler().postDelayed(
                                 {
-                                    goToLogin()
+                                    navigateToLogin()
                                 }, 2000
                             )
 
@@ -224,13 +224,13 @@ fun SignUpScreen(
         Link(
             leftText = "Sign up as",
             rightText = "Repair Shop Owner",
-            linkTo = goToRepairShopRegister
+            linkTo = navigateToRepairShopRegister
         )
         Link(
             leftText = "Joined us before?",
             rightText = "Login",
             modifier = Modifier.padding(top = 16.dp),
-            linkTo = goToLogin
+            linkTo = navigateToLogin
         )
     }
 }
@@ -242,7 +242,7 @@ fun SignUpScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            SignUpScreen(goToLogin = { /*TODO*/ }, goToRepairShopRegister = { /*TODO*/ })
+            SignUpScreen(navigateToLogin = { /*TODO*/ }, navigateToRepairShopRegister = { /*TODO*/ })
         }
     }
 }

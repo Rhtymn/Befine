@@ -2,7 +2,11 @@ package com.example.befine.navigation
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
-    object Profile : Screen("profile")
+    object RepairShopHome : Screen("repairShopHome")
+    object Profile : Screen("profile/{role}") {
+        fun createRoute(role: String) = "profile/$role"
+    }
+
     object Details : Screen("details")
     object ChatChannel : Screen("chatChannel")
     object Login : Screen("login")

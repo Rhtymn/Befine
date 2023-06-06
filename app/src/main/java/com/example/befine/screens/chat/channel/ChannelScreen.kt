@@ -10,12 +10,9 @@ import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.Screen
 
 @Composable
-fun ChannelScreen() {
+fun ChannelScreen(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.padding(
-            horizontal = Screen.paddingHorizontal,
-            vertical = Screen.paddingVertical
-        )
+        modifier = modifier.fillMaxSize()
     ) {
         ChatBox(
             name = "Andy Machisa",

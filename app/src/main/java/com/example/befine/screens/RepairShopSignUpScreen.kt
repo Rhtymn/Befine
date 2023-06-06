@@ -26,7 +26,7 @@ import com.example.befine.components.authentication.Link
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.R
 import com.example.befine.components.ui.FormErrorText
-import com.example.befine.model.RepairShopData
+import com.example.befine.model.RepairShop
 import com.example.befine.firebase.Auth
 import com.example.befine.model.UserData
 import com.example.befine.utils.*
@@ -127,7 +127,11 @@ fun RepairShopSignUpScreen(
                                     name = repairShopName,
                                     role = REPAIR_SHOP_OWNER.name
                                 )
-                                val repairShopData = RepairShopData(userId = auth.currentUser!!.uid)
+                                val repairShopData = RepairShop(
+                                    userId = auth.currentUser!!.uid,
+                                    name = repairShopName,
+                                    photo = "default.jpg"
+                                )
 
                                 val usersRef =
                                     db.collection("users").document(auth.currentUser!!.uid)

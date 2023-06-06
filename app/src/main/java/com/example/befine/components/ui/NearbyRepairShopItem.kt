@@ -16,12 +16,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.befine.R
+import com.example.befine.firebase.Storage
 import com.example.befine.ui.theme.Shapes
 import com.example.befine.utils.STATUS
+import com.google.firebase.storage.FirebaseStorage
 
 
 @Composable
-fun NearbyRepairShopItem(name: String, distance: String, status: String) {
+fun NearbyRepairShopItem(
+    name: String,
+    distance: String,
+    status: String,
+    image: String = "default.jpg",
+    storage: FirebaseStorage = Storage.getInstance().getStorage()
+) {
+    val imageURL = storage.reference.child("images/$image")
     Card(
         Modifier
             .width(150.dp)

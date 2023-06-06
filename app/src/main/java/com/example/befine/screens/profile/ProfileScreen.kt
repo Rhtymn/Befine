@@ -15,12 +15,22 @@ import com.example.befine.R
 import com.example.befine.components.ui.profile.ActionButton
 import com.example.befine.components.ui.profile.ProfileInformation
 import com.example.befine.components.ui.profile.actionButtonIconModifier
+import com.example.befine.firebase.Auth
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.ROLE
 import com.example.befine.utils.Screen
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun ProfileScreen(role: String = ROLE.CLIENT) {
+fun ProfileScreen(
+    role: String = ROLE.CLIENT,
+    goToLoginScreen: () -> Unit,
+    auth: FirebaseAuth = Auth.getInstance().getAuth()
+) {
+    val logoutHandler = {
+        auth.signOut()
+        goToLoginScreen()
+    }
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -45,6 +55,7 @@ fun ProfileScreen(role: String = ROLE.CLIENT) {
                 )
             }
             ActionButton(
+                onClick = logoutHandler,
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_logout_24),
@@ -62,6 +73,6 @@ fun ProfileScreen(role: String = ROLE.CLIENT) {
 @Composable
 fun ProfileScreenPreview() {
     BefineTheme {
-        ProfileScreen(ROLE.REPAIR_SHOP_OWNER)
+        ProfileScreen(goToLoginScreen = { /*TODO*/ })
     }
 }

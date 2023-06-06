@@ -49,7 +49,7 @@ fun BefineApp(
         }
     }
 
-    fun goToHome() = { -> navController.navigate(Screen.Home.route) }
+    fun goToRegularHomeScreen() = { -> navController.navigate(Screen.Home.route) }
     fun goToRegisterUser() = { ->
         navController.navigate(Screen.RegisterUser.route)
     }
@@ -57,7 +57,8 @@ fun BefineApp(
     NavHost(navController = navController, startDestination = Screen.Login.route) {
         composable(Screen.Login.route) {
             LoginScreen(
-                goToUserRegister = goToRegisterUser()
+                goToUserRegister = goToRegisterUser(),
+                goToRegularHomeScreen = goToRegularHomeScreen()
             )
         }
         composable(Screen.RegisterUser.route) {
@@ -79,7 +80,7 @@ fun BefineApp(
             )
         }
         composable(Screen.Profile.route) {
-            ProfileScreen()
+            ProfileScreen(goToLoginScreen = goToLogin())
         }
         composable(Screen.ChatChannel.route) {
             ChannelScreen()

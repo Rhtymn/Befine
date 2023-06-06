@@ -1,5 +1,6 @@
 package com.example.befine.components.ui.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,11 +17,12 @@ val actionButtonIconModifier = Modifier
     .height(36.dp)
 
 @Composable
-fun ActionButton(icon: @Composable (() -> Unit), text: String) {
+fun ActionButton(icon: @Composable (() -> Unit), text: String, onClick: () -> Unit = {}) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .height(70.dp)
+            .clickable { onClick() }
     ) {
         icon()
         Text(

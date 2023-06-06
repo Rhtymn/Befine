@@ -23,15 +23,22 @@ import com.example.befine.components.authentication.InputField
 import com.example.befine.components.authentication.Link
 import com.example.befine.components.ui.FormErrorText
 import com.example.befine.firebase.Auth
+import com.example.befine.model.User
+import com.example.befine.repository.UsersRepository
 import com.example.befine.utils.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun LoginScreen(
     goToUserRegister: () -> Unit,
-    auth: FirebaseAuth = Auth.getInstance().getAuth()
+    auth: FirebaseAuth = Auth.getInstance().getAuth(),
+    goToRegularHomeScreen: () -> Unit,
+    db: FirebaseFirestore = Firebase.firestore
 ) {
     // Context
     val context = LocalContext.current
@@ -98,9 +105,24 @@ fun LoginScreen(
                             // Sign in success, update UI with the signed-in user's information
                             resetInputField()
 
-                            Toast.makeText(context, "Login Success", Toast.LENGTH_SHORT)
-                                .show()
-
+                            db.collection("users").document(auth.currentUser!!.uid).get()
+                                .addOnSuccessListener {
+                                    if (it.get("role") == "REGULAR_USER") {
+                                        goToRegularHomeScreen()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Repair Shop Home Screen under development",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }.addOnFailureListener {
+                                    Toast.makeText(
+                                        context,
+                                        "Something went wrong, try again later",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                         } else {
                             // If sign in fails, display a message to the user
                             isFailed = true
@@ -175,7 +197,7 @@ fun LoginScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            LoginScreen(goToUserRegister = { /*TODO*/ })
+            LoginScreen(goToUserRegister = { /*TODO*/ }, goToRegularHomeScreen = { /*TODO*/ })
         }
     }
 }

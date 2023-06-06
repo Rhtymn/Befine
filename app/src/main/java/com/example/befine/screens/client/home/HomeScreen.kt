@@ -115,7 +115,7 @@ fun NearbyShopList(data: List<RepairShop>) {
             NearbyRepairShopItem(
                 name = it.name.toString(),
                 distance = "0.7 km",
-                status = STATUS.OPEN
+                status = STATUS.CLOSED
             )
         }
     }

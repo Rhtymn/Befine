@@ -14,7 +14,6 @@ fun RepairShopAddress(value: String, modifier: Modifier = Modifier, maxLines: In
         fontSize = 12.sp,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
-        modifier = modifier,
-        fontWeight = FontWeight.Light
+        modifier = modifier
     )
 }

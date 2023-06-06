@@ -1,10 +1,11 @@
 package com.example.befine.components.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.befine.R
 import com.example.befine.firebase.Storage
 import com.example.befine.ui.theme.Shapes
@@ -30,7 +32,15 @@ fun NearbyRepairShopItem(
     image: String = "default.jpg",
     storage: FirebaseStorage = Storage.getInstance().getStorage()
 ) {
-    val imageURL = storage.reference.child("images/$image")
+    var imageUrl by remember { mutableStateOf("") }
+    val imageRef = storage.reference.child("images/$image")
+
+    LaunchedEffect(true) {
+        imageRef.downloadUrl.addOnSuccessListener { uri ->
+            imageUrl = uri.toString()
+        }
+    }
+
     Card(
         Modifier
             .width(150.dp)
@@ -45,7 +55,10 @@ fun NearbyRepairShopItem(
                     .width(150.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.wolf),
+                    painter = rememberAsyncImagePainter(
+                        imageUrl,
+                        placeholder = painterResource(id = R.drawable.default_image)
+                    ),
                     contentDescription = "",
                     modifier = Modifier
                         .width(150.dp)
@@ -72,7 +85,7 @@ fun NearbyRepairShopItem(
 
 @Composable
 fun Distance(value: String) {
-    Text(text = value, fontSize = 10.sp, fontWeight = FontWeight.Light)
+    Text(text = value, fontSize = 12.sp)
 }
 
 @Preview

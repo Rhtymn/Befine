@@ -12,7 +12,7 @@ fun RepairShopName(name: String, modifier: Modifier = Modifier) {
     Text(
         text = name,
         fontWeight = FontWeight.Bold,
-        fontSize = 13.sp,
+        fontSize = 15.sp,
         modifier = modifier,
         overflow = TextOverflow.Ellipsis
     )

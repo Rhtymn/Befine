@@ -61,5 +61,32 @@ fun InputField(
                 label = { Text(label) }
             )
         }
+    } else {
+        if (isError) {
+            OutlinedTextField(
+                value = value,
+                isError = true,
+                onValueChange = onValueChange,
+                visualTransformation = visualTransformation,
+                keyboardOptions = keyboardOptions,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                supportingText = { SupportingText(errorMessage = errorMessage) },
+                label = { Text(label) }
+            )
+        } else {
+            OutlinedTextField(
+                value = value,
+                isError = false,
+                onValueChange = onValueChange,
+                visualTransformation = visualTransformation,
+                keyboardOptions = keyboardOptions,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                label = { Text(label) }
+            )
+        }
     }
 }

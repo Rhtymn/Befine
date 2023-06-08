@@ -11,7 +11,13 @@ import androidx.compose.ui.unit.dp
 import com.example.befine.components.authentication.InputField
 
 @Composable
-fun TimeInput(value: String, modifier: Modifier = Modifier, label: String, onClick: () -> Unit) {
+fun TimeInput(
+    value: String,
+    modifier: Modifier = Modifier,
+    label: String,
+    enabled: Boolean = false,
+    onClick: () -> Unit
+) {
     InputField(
         value = value,
         onValueChange = { },
@@ -19,6 +25,7 @@ fun TimeInput(value: String, modifier: Modifier = Modifier, label: String, onCli
         modifier = modifier
             .padding(end = 8.dp),
         readOnly = true,
+        enabled = enabled,
         interactionSource = remember {
             MutableInteractionSource()
         }.also { interactionSource ->

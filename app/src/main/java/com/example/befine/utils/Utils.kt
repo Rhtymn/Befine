@@ -13,7 +13,7 @@ object STATUS {
 }
 
 object ActiveTimePicker {
-    val START_WEEKDAYS =  "startWeekdays"
+    val START_WEEKDAYS = "startWeekdays"
     val END_WEEKDAYS = "endWeekdays"
     val START_WEEKEND = "startWeekend"
     val END_WEEKEND = "endWeekend"
@@ -50,6 +50,16 @@ object SignUpError {
 object LoginError {
     const val INVALID = "Invalid email or password"
     const val DEFAULT = "Server is down, please try again later"
+}
+
+object Day {
+    const val SUNDAY = "sunday"
+    const val MONDAY = "monday"
+    const val TUESDAY = "tuesday"
+    const val WEDNESDAY = "wednesday"
+    const val THURSDAY = "thursday"
+    const val FRIDAY = "friday"
+    const val SATURDAY = "saturday"
 }
 
 fun inputFieldValidation(value: String, callbackWhenEmpty: () -> Unit) {

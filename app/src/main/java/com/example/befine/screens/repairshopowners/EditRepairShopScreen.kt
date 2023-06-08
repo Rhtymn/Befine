@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
@@ -29,14 +30,31 @@ import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import com.example.befine.BuildConfig
 import com.example.befine.ui.theme.BefineTheme
-import com.example.befine.utils.Screen
 import com.example.befine.R
 import com.example.befine.components.authentication.InputField
 import com.example.befine.components.ui.repairshop.*
-import com.example.befine.utils.ActiveTimePicker
-import com.example.befine.utils.convertTime
-import com.example.befine.utils.createImageFile
+import com.example.befine.utils.*
 import java.util.*
+
+@Composable
+fun DayPicker(text: String, active: Boolean = false, onClick: () -> Unit) {
+    val backgroundColor = if (active) MaterialTheme.colorScheme.primary else Color.White
+    val textColor = if (active) Color.White else MaterialTheme.colorScheme.primary
+    val baseModifier = Modifier
+        .size(40.dp)
+        .clip(CircleShape)
+        .background(backgroundColor)
+    var modifier = baseModifier
+    if (!active) {
+        modifier = baseModifier.border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+    }
+
+    Box(
+        modifier = modifier.clickable { onClick() }
+    ) {
+        Text(text = text, modifier = Modifier.align(Alignment.Center), color = textColor)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +89,20 @@ fun EditRepairShopScreen(
     var startWeekendHours by remember { mutableStateOf("00:00") }
     var endWeekendHours by remember { mutableStateOf("00:00") }
 
+    // State related to selected day
+    val days =
+        listOf(
+            Day.MONDAY,
+            Day.TUESDAY,
+            Day.WEDNESDAY,
+            Day.THURSDAY,
+            Day.FRIDAY,
+            Day.SATURDAY,
+            Day.SUNDAY
+        )
+    val selectedDay = remember {
+        mutableStateMapOf(*days.map { it to false }.toTypedArray())
+    }
 
     // Launcher for taking image from camera by implicit intent
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -155,8 +187,37 @@ fun EditRepairShopScreen(
             text = "Select Location",
             icon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") }
         )
+        Row(
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            DayPicker(text = "M", selectedDay[Day.MONDAY]!!) {
+                selectedDay[Day.MONDAY] = !selectedDay[Day.MONDAY]!!
+            }
+            DayPicker(text = "T", selectedDay[Day.TUESDAY]!!) {
+                selectedDay[Day.TUESDAY] = !selectedDay[Day.TUESDAY]!!
+            }
+            DayPicker(text = "W", selectedDay[Day.WEDNESDAY]!!) {
+                selectedDay[Day.WEDNESDAY] = !selectedDay[Day.WEDNESDAY]!!
+            }
+            DayPicker(text = "T", selectedDay[Day.THURSDAY]!!) {
+                selectedDay[Day.THURSDAY] = !selectedDay[Day.THURSDAY]!!
+            }
+            DayPicker(text = "F", selectedDay[Day.FRIDAY]!!) {
+                selectedDay[Day.FRIDAY] = !selectedDay[Day.FRIDAY]!!
+            }
+            DayPicker(text = "S", selectedDay[Day.SATURDAY]!!) {
+                selectedDay[Day.SATURDAY] = !selectedDay[Day.SATURDAY]!!
+            }
+            DayPicker(text = "S", selectedDay[Day.SUNDAY]!!) {
+                selectedDay[Day.SUNDAY] = !selectedDay[Day.SUNDAY]!!
+            }
+        }
         TimeInputRange(
             label = "Weekday Hours",
+            enabled = selectedDay[Day.MONDAY]!! || selectedDay[Day.TUESDAY]!! || selectedDay[Day.WEDNESDAY]!! || selectedDay[Day.THURSDAY]!! || selectedDay[Day.FRIDAY]!!,
             onPickStartTime = {
                 showTimePickerDialog = true
                 activeSelectedTimePicker = ActiveTimePicker.START_WEEKDAYS
@@ -170,6 +231,7 @@ fun EditRepairShopScreen(
         )
         TimeInputRange(
             label = "Weekend Hours",
+            enabled = selectedDay[Day.SATURDAY]!! || selectedDay[Day.SUNDAY]!!,
             onPickStartTime = {
                 showTimePickerDialog = true
                 activeSelectedTimePicker = ActiveTimePicker.START_WEEKEND

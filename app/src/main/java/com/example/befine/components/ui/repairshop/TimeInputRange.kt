@@ -13,14 +13,25 @@ fun TimeInputRange(
     onPickStartTime: () -> Unit,
     onPickEndTime: () -> Unit,
     startValue: String,
-    endValue: String
+    endValue: String,
+    enabled: Boolean = false
 ) {
     Text(text = label, modifier = Modifier.padding(top = 8.dp, bottom = 4.dp))
     Row() {
-        TimeInput(value = startValue, modifier = Modifier.weight(1f), label = "Start") {
+        TimeInput(
+            value = startValue,
+            modifier = Modifier.weight(1f),
+            label = "Start",
+            enabled = enabled
+        ) {
             onPickStartTime()
         }
-        TimeInput(value = endValue, modifier = Modifier.weight(1f), label = "End") {
+        TimeInput(
+            value = endValue,
+            modifier = Modifier.weight(1f),
+            label = "End",
+            enabled = enabled
+        ) {
             onPickEndTime()
         }
     }

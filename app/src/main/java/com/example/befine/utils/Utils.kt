@@ -10,6 +10,8 @@ object STATUS {
 object ActiveTimePicker {
     val START_WEEKDAYS =  "startWeekdays"
     val END_WEEKDAYS = "endWeekdays"
+    val START_WEEKEND = "startWeekend"
+    val END_WEEKEND = "endWeekend"
 }
 
 object Screen {

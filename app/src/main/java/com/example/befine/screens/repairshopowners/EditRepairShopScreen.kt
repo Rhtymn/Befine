@@ -9,8 +9,6 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
@@ -37,41 +35,16 @@ import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.Screen
 import com.example.befine.R
 import com.example.befine.components.authentication.InputField
-import com.example.befine.components.ui.repairshop.DialogButton
-import com.example.befine.components.ui.repairshop.LauncherButton
-import com.example.befine.components.ui.repairshop.PickerButton
+import com.example.befine.components.ui.repairshop.*
 import com.example.befine.utils.ActiveTimePicker
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
 fun convertTime(hour: Int, minute: Int): String {
-    val hour = if (hour > 9) hour else "0$hour"
-    val minute = if (minute > 9) minute else "0$minute"
-    return "$hour:$minute"
-}
-
-@Composable
-fun TimeInput(value: String, modifier: Modifier = Modifier, label: String, onClick: () -> Unit) {
-    InputField(
-        value = value,
-        onValueChange = { },
-        label = label,
-        modifier = modifier
-            .padding(end = 8.dp),
-        readOnly = true,
-        interactionSource = remember {
-            MutableInteractionSource()
-        }.also { interactionSource ->
-            LaunchedEffect(interactionSource) {
-                interactionSource.interactions.collect {
-                    if (it is PressInteraction.Release) {
-                        onClick()
-                    }
-                }
-            }
-        }
-    )
+    val convertedHour = if (hour > 9) hour else "0$hour"
+    val convertedMinute = if (minute > 9) minute else "0$minute"
+    return "$convertedHour:$convertedMinute"
 }
 
 
@@ -108,12 +81,17 @@ fun EditRepairShopScreen(
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
+    // State related to time picker
     var showTimePickerDialog by remember { mutableStateOf(false) }
     val startWeekdayHoursState = rememberTimePickerState(is24Hour = true)
     val endWeekdayHoursState = rememberTimePickerState(is24Hour = true)
+    val startWeekendHoursState = rememberTimePickerState(is24Hour = true)
+    val endWeekendHoursState = rememberTimePickerState(is24Hour = true)
     var activeSelectedTimePicker by remember { mutableStateOf("") }
     var startWeekdayHours by remember { mutableStateOf("00:00") }
     var endWeekdaysHours by remember { mutableStateOf("00:00") }
+    var startWeekendHours by remember { mutableStateOf("00:00") }
+    var endWeekendHours by remember { mutableStateOf("00:00") }
 
 
     // Launcher for taking image from camera by implicit intent
@@ -199,17 +177,32 @@ fun EditRepairShopScreen(
             text = "Select Location",
             icon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") }
         )
-        Text(text = "Weekday Hours", modifier = Modifier.padding(top = 8.dp, bottom = 4.dp))
-        Row() {
-            TimeInput(value = startWeekdayHours, modifier = Modifier.weight(1f), label = "Start") {
+        TimeInputRange(
+            label = "Weekday Hours",
+            onPickStartTime = {
                 showTimePickerDialog = true
                 activeSelectedTimePicker = ActiveTimePicker.START_WEEKDAYS
-            }
-            TimeInput(value = endWeekdaysHours, modifier = Modifier.weight(1f), label = "End") {
+            },
+            onPickEndTime = {
                 showTimePickerDialog = true
                 activeSelectedTimePicker = ActiveTimePicker.END_WEEKDAYS
-            }
-        }
+            },
+            startValue = startWeekdayHours,
+            endValue = endWeekdaysHours
+        )
+        TimeInputRange(
+            label = "Weekend Hours",
+            onPickStartTime = {
+                showTimePickerDialog = true
+                activeSelectedTimePicker = ActiveTimePicker.START_WEEKEND
+            },
+            onPickEndTime = {
+                showTimePickerDialog = true
+                activeSelectedTimePicker = ActiveTimePicker.END_WEEKEND
+            },
+            startValue = startWeekendHours,
+            endValue = endWeekendHours
+        )
         if (showTimePickerDialog) {
             Dialog(onDismissRequest = { showTimePickerDialog = false }) {
                 Column(
@@ -224,21 +217,33 @@ fun EditRepairShopScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(text = "Select time", modifier = Modifier.padding(bottom = 10.dp))
-                    TimePicker(state = if (activeSelectedTimePicker == ActiveTimePicker.START_WEEKDAYS) startWeekdayHoursState else endWeekdayHoursState)
+                    val state = when (activeSelectedTimePicker) {
+                        ActiveTimePicker.START_WEEKDAYS -> startWeekdayHoursState
+                        ActiveTimePicker.END_WEEKDAYS -> endWeekdayHoursState
+                        ActiveTimePicker.START_WEEKEND -> startWeekendHoursState
+                        else -> endWeekendHoursState
+                    }
+                    TimePicker(state = state)
                     Row(modifier = Modifier.align(Alignment.End)) {
                         DialogButton(onClick = { showTimePickerDialog = false }, text = "Cancel")
                         DialogButton(onClick = {
                             showTimePickerDialog = false
-                            if (activeSelectedTimePicker == ActiveTimePicker.START_WEEKDAYS) {
-                                startWeekdayHours =
-                                    convertTime(
-                                        startWeekdayHoursState.hour,
-                                        startWeekdayHoursState.minute
-                                    )
-                            } else {
-                                endWeekdaysHours = convertTime(
+                            when (activeSelectedTimePicker) {
+                                ActiveTimePicker.START_WEEKDAYS -> startWeekdayHours = convertTime(
+                                    startWeekdayHoursState.hour,
+                                    startWeekdayHoursState.minute
+                                )
+                                ActiveTimePicker.END_WEEKDAYS -> endWeekdaysHours = convertTime(
                                     endWeekdayHoursState.hour,
                                     endWeekdayHoursState.minute
+                                )
+                                ActiveTimePicker.START_WEEKEND -> startWeekendHours = convertTime(
+                                    startWeekendHoursState.hour,
+                                    startWeekendHoursState.minute
+                                )
+                                ActiveTimePicker.END_WEEKEND -> endWeekendHours = convertTime(
+                                    endWeekendHoursState.hour,
+                                    endWeekendHoursState.minute
                                 )
                             }
                         }, text = "OK")

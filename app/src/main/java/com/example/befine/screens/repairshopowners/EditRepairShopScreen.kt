@@ -40,6 +40,7 @@ import com.example.befine.components.authentication.InputField
 import com.example.befine.components.ui.repairshop.DialogButton
 import com.example.befine.components.ui.repairshop.LauncherButton
 import com.example.befine.components.ui.repairshop.PickerButton
+import com.example.befine.utils.ActiveTimePicker
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -49,6 +50,30 @@ fun convertTime(hour: Int, minute: Int): String {
     val minute = if (minute > 9) minute else "0$minute"
     return "$hour:$minute"
 }
+
+@Composable
+fun TimeInput(value: String, modifier: Modifier = Modifier, label: String, onClick: () -> Unit) {
+    InputField(
+        value = value,
+        onValueChange = { },
+        label = label,
+        modifier = modifier
+            .padding(end = 8.dp),
+        readOnly = true,
+        interactionSource = remember {
+            MutableInteractionSource()
+        }.also { interactionSource ->
+            LaunchedEffect(interactionSource) {
+                interactionSource.interactions.collect {
+                    if (it is PressInteraction.Release) {
+                        onClick()
+                    }
+                }
+            }
+        }
+    )
+}
+
 
 @SuppressLint("SimpleDateFormat")
 fun Context.createImageFile(): File {
@@ -69,6 +94,7 @@ fun EditRepairShopScreen(
     // Context for this composable component
     val context = LocalContext.current
 
+
     // Create file object with unique file name that can be used to store the captured image.
     // stores it in external cache directory
     val file = context.createImageFile()
@@ -82,9 +108,12 @@ fun EditRepairShopScreen(
         mutableStateOf<Uri>(Uri.EMPTY)
     }
 
-    var showTimePicker by remember { mutableStateOf(false) }
-    val timePickerState = rememberTimePickerState(is24Hour = true)
-    val formatter = remember { SimpleDateFormat("hh::mm a", Locale.getDefault()) }
+    var showTimePickerDialog by remember { mutableStateOf(false) }
+    val startWeekdayHoursState = rememberTimePickerState(is24Hour = true)
+    val endWeekdayHoursState = rememberTimePickerState(is24Hour = true)
+    var activeSelectedTimePicker by remember { mutableStateOf("") }
+    var startWeekdayHours by remember { mutableStateOf("00:00") }
+    var endWeekdaysHours by remember { mutableStateOf("00:00") }
 
 
     // Launcher for taking image from camera by implicit intent
@@ -172,35 +201,17 @@ fun EditRepairShopScreen(
         )
         Text(text = "Weekday Hours", modifier = Modifier.padding(top = 8.dp, bottom = 4.dp))
         Row() {
-            InputField(
-                value = convertTime(timePickerState.hour, timePickerState.minute),
-                onValueChange = { },
-                label = "Start",
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
-                readOnly = true,
-                interactionSource = remember {
-                    MutableInteractionSource()
-                }.also { interactionSource ->
-                    LaunchedEffect(interactionSource) {
-                        interactionSource.interactions.collect {
-                            if (it is PressInteraction.Release) {
-                                showTimePicker = true
-                            }
-                        }
-                    }
-                }
-            )
-            InputField(
-                value = "",
-                onValueChange = {},
-                label = "End",
-                modifier = Modifier.weight(1f)
-            )
+            TimeInput(value = startWeekdayHours, modifier = Modifier.weight(1f), label = "Start") {
+                showTimePickerDialog = true
+                activeSelectedTimePicker = ActiveTimePicker.START_WEEKDAYS
+            }
+            TimeInput(value = endWeekdaysHours, modifier = Modifier.weight(1f), label = "End") {
+                showTimePickerDialog = true
+                activeSelectedTimePicker = ActiveTimePicker.END_WEEKDAYS
+            }
         }
-        if (showTimePicker) {
-            Dialog(onDismissRequest = { showTimePicker = false }) {
+        if (showTimePickerDialog) {
+            Dialog(onDismissRequest = { showTimePickerDialog = false }) {
                 Column(
                     modifier = Modifier
                         .background(Color.White)
@@ -213,10 +224,24 @@ fun EditRepairShopScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(text = "Select time", modifier = Modifier.padding(bottom = 10.dp))
-                    TimePicker(state = timePickerState)
+                    TimePicker(state = if (activeSelectedTimePicker == ActiveTimePicker.START_WEEKDAYS) startWeekdayHoursState else endWeekdayHoursState)
                     Row(modifier = Modifier.align(Alignment.End)) {
-                        DialogButton(onClick = { showTimePicker = false }, text = "Cancel")
-                        DialogButton(onClick = { showTimePicker = false }, text = "OK")
+                        DialogButton(onClick = { showTimePickerDialog = false }, text = "Cancel")
+                        DialogButton(onClick = {
+                            showTimePickerDialog = false
+                            if (activeSelectedTimePicker == ActiveTimePicker.START_WEEKDAYS) {
+                                startWeekdayHours =
+                                    convertTime(
+                                        startWeekdayHoursState.hour,
+                                        startWeekdayHoursState.minute
+                                    )
+                            } else {
+                                endWeekdaysHours = convertTime(
+                                    endWeekdayHoursState.hour,
+                                    endWeekdayHoursState.minute
+                                )
+                            }
+                        }, text = "OK")
                     }
                 }
             }

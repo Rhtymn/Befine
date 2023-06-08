@@ -7,6 +7,11 @@ object STATUS {
     const val CLOSED = "closed"
 }
 
+object ActiveTimePicker {
+    val START_WEEKDAYS =  "startWeekdays"
+    val END_WEEKDAYS = "endWeekdays"
+}
+
 object Screen {
     val paddingVertical = 16.dp
     val paddingHorizontal = 16.dp

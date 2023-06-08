@@ -8,29 +8,27 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
@@ -39,9 +37,18 @@ import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.Screen
 import com.example.befine.R
 import com.example.befine.components.authentication.InputField
+import com.example.befine.components.ui.repairshop.DialogButton
+import com.example.befine.components.ui.repairshop.LauncherButton
+import com.example.befine.components.ui.repairshop.PickerButton
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+
+fun convertTime(hour: Int, minute: Int): String {
+    val hour = if (hour > 9) hour else "0$hour"
+    val minute = if (minute > 9) minute else "0$minute"
+    return "$hour:$minute"
+}
 
 @SuppressLint("SimpleDateFormat")
 fun Context.createImageFile(): File {
@@ -55,41 +62,7 @@ fun Context.createImageFile(): File {
     )
 }
 
-@Composable
-fun LauncherButton(onClick: () -> Unit, text: String) {
-    OutlinedButton(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.width(110.dp)
-    ) {
-        Text(text = text, color = MaterialTheme.colorScheme.primary)
-    }
-}
-
-@Composable
-fun PickerButton(text: String, icon: @Composable (() -> Unit)? = null) {
-    OutlinedButton(
-        onClick = { /*TODO*/ },
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .fillMaxWidth()
-            .height(50.dp),
-        border = BorderStroke(1.dp, Color.Gray)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            if (icon != null) {
-                icon()
-            }
-            Text(text = text, color = Color.Black)
-        }
-    }
-}
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRepairShopScreen(
 ) {
@@ -108,6 +81,11 @@ fun EditRepairShopScreen(
     var capturedImageUri by remember {
         mutableStateOf<Uri>(Uri.EMPTY)
     }
+
+    var showTimePicker by remember { mutableStateOf(false) }
+    val timePickerState = rememberTimePickerState(is24Hour = true)
+    val formatter = remember { SimpleDateFormat("hh::mm a", Locale.getDefault()) }
+
 
     // Launcher for taking image from camera by implicit intent
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -192,6 +170,57 @@ fun EditRepairShopScreen(
             text = "Select Location",
             icon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") }
         )
+        Text(text = "Weekday Hours", modifier = Modifier.padding(top = 8.dp, bottom = 4.dp))
+        Row() {
+            InputField(
+                value = convertTime(timePickerState.hour, timePickerState.minute),
+                onValueChange = { },
+                label = "Start",
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
+                readOnly = true,
+                interactionSource = remember {
+                    MutableInteractionSource()
+                }.also { interactionSource ->
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect {
+                            if (it is PressInteraction.Release) {
+                                showTimePicker = true
+                            }
+                        }
+                    }
+                }
+            )
+            InputField(
+                value = "",
+                onValueChange = {},
+                label = "End",
+                modifier = Modifier.weight(1f)
+            )
+        }
+        if (showTimePicker) {
+            Dialog(onDismissRequest = { showTimePicker = false }) {
+                Column(
+                    modifier = Modifier
+                        .background(Color.White)
+                        .clip(
+                            RoundedCornerShape(
+                                14.dp
+                            )
+                        )
+                        .padding(horizontal = 20.dp, vertical = 14.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "Select time", modifier = Modifier.padding(bottom = 10.dp))
+                    TimePicker(state = timePickerState)
+                    Row(modifier = Modifier.align(Alignment.End)) {
+                        DialogButton(onClick = { showTimePicker = false }, text = "Cancel")
+                        DialogButton(onClick = { showTimePicker = false }, text = "OK")
+                    }
+                }
+            }
+        }
     }
 }
 

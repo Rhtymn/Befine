@@ -1,8 +1,6 @@
 package com.example.befine.screens.repairshopowners
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
@@ -12,7 +10,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
@@ -37,28 +34,9 @@ import com.example.befine.R
 import com.example.befine.components.authentication.InputField
 import com.example.befine.components.ui.repairshop.*
 import com.example.befine.utils.ActiveTimePicker
-import java.io.File
-import java.text.SimpleDateFormat
+import com.example.befine.utils.convertTime
+import com.example.befine.utils.createImageFile
 import java.util.*
-
-fun convertTime(hour: Int, minute: Int): String {
-    val convertedHour = if (hour > 9) hour else "0$hour"
-    val convertedMinute = if (minute > 9) minute else "0$minute"
-    return "$convertedHour:$convertedMinute"
-}
-
-
-@SuppressLint("SimpleDateFormat")
-fun Context.createImageFile(): File {
-    // Create an image file name
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-    val imageFileName = "JPEG_" + timeStamp + "_"
-    return File.createTempFile(
-        imageFileName,
-        ".jpg",
-        externalCacheDir
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -216,17 +194,9 @@ fun EditRepairShopScreen(
                         .padding(horizontal = 20.dp, vertical = 14.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Select time", modifier = Modifier.padding(bottom = 10.dp))
-                    val state = when (activeSelectedTimePicker) {
-                        ActiveTimePicker.START_WEEKDAYS -> startWeekdayHoursState
-                        ActiveTimePicker.END_WEEKDAYS -> endWeekdayHoursState
-                        ActiveTimePicker.START_WEEKEND -> startWeekendHoursState
-                        else -> endWeekendHoursState
-                    }
-                    TimePicker(state = state)
-                    Row(modifier = Modifier.align(Alignment.End)) {
-                        DialogButton(onClick = { showTimePickerDialog = false }, text = "Cancel")
-                        DialogButton(onClick = {
+                    CustomTimePicker(
+                        onCancel = { showTimePickerDialog = false },
+                        onConfirm = {
                             showTimePickerDialog = false
                             when (activeSelectedTimePicker) {
                                 ActiveTimePicker.START_WEEKDAYS -> startWeekdayHours = convertTime(
@@ -246,8 +216,18 @@ fun EditRepairShopScreen(
                                     endWeekendHoursState.minute
                                 )
                             }
-                        }, text = "OK")
-                    }
+                        },
+                        selectedState = {
+                            when (it) {
+                                ActiveTimePicker.START_WEEKDAYS -> startWeekdayHoursState
+                                ActiveTimePicker.END_WEEKDAYS -> endWeekdayHoursState
+                                ActiveTimePicker.START_WEEKEND -> startWeekendHoursState
+                                else -> endWeekendHoursState
+                            }
+                        },
+                        activeTimePicker = activeSelectedTimePicker,
+                        buttonContainerModifier = Modifier.align(Alignment.End)
+                    )
                 }
             }
         }

@@ -1,6 +1,11 @@
 package com.example.befine.utils
 
+import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.ui.unit.dp
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 object STATUS {
     const val OPEN = "open"
@@ -79,4 +84,22 @@ fun passwordValidation(
     } else if (value.length < 8) {
         callbackWhenLessThanEightChar()
     }
+}
+
+fun convertTime(hour: Int, minute: Int): String {
+    val convertedHour = if (hour > 9) hour else "0$hour"
+    val convertedMinute = if (minute > 9) minute else "0$minute"
+    return "$convertedHour:$convertedMinute"
+}
+
+@SuppressLint("SimpleDateFormat")
+fun Context.createImageFile(): File {
+    // Create an image file name
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+    val imageFileName = "JPEG_" + timeStamp + "_"
+    return File.createTempFile(
+        imageFileName,
+        ".jpg",
+        externalCacheDir
+    )
 }

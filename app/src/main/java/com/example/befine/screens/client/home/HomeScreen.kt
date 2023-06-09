@@ -1,5 +1,15 @@
 package com.example.befine.screens.client
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Bundle
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -9,13 +19,15 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.befine.components.ui.NearbyRepairShopItem
 import com.example.befine.components.ui.RepairShopItem
@@ -27,6 +39,75 @@ import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.STATUS
 import com.example.befine.utils.Screen
 import com.example.befine.utils.ViewModelFactory
+
+private const val REQUEST_LOCATION_PERMISSION = 1
+
+@Composable
+fun GetUserLocation() {
+    val context = LocalContext.current
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+    val isLocationEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    var location by remember { mutableStateOf<Location?>(null) }
+    val Geocoder = Geocoder(context)
+
+    DisposableEffect(Unit) {
+        val locationListener = object : LocationListener {
+            override fun onLocationChanged(newLocation: Location) {
+                location = newLocation
+            }
+
+            @Deprecated("Deprecated in Java")
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+                super.onStatusChanged(provider, status, extras)
+            }
+
+            override fun onProviderEnabled(provider: String) {
+                super.onProviderEnabled(provider)
+            }
+
+            override fun onProviderDisabled(provider: String) {
+                super.onProviderDisabled(provider)
+            }
+        }
+
+        val permissionStatus = ActivityCompat.checkSelfPermission(context, locationPermission)
+        if (isLocationEnabled && permissionStatus == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                0L,
+                0f,
+                locationListener
+            )
+        } else {
+            // Requset location permission
+            ActivityCompat.requestPermissions(
+                context as Activity,
+                arrayOf(locationPermission),
+                REQUEST_LOCATION_PERMISSION
+            )
+        }
+
+        onDispose {
+            locationManager.removeUpdates(locationListener)
+        }
+    }
+
+    if (location != null) {
+        val address = Geocoder.getFromLocation(location!!.latitude, location!!.longitude, 1)
+        UserLocation(
+            location = "${address?.get(0)?.thoroughfare}, ${address?.get(0)?.locality}",
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+    } else {
+        UserLocation(
+            location = "User Location",
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+    }
+
+
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,10 +167,7 @@ fun HomeScreen(
                     vertical = Screen.paddingVertical
                 )
         ) {
-            UserLocation(
-                location = "User Location",
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            GetUserLocation()
             HeaderText(value = "Nearby Repair Shops")
             NearbyShopList(data = data)
             HeaderText(value = "Others")

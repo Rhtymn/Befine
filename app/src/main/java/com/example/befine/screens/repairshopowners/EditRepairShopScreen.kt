@@ -118,16 +118,6 @@ fun EditRepairShopScreen(
     var longitude by remember { mutableStateOf(0.0) }
 
     // State related to selected day
-    val days =
-        listOf(
-            Day.MONDAY,
-            Day.TUESDAY,
-            Day.WEDNESDAY,
-            Day.THURSDAY,
-            Day.FRIDAY,
-            Day.SATURDAY,
-            Day.SUNDAY
-        )
     val selectedDay = remember {
         mutableStateMapOf(*days.map { it to false }.toTypedArray())
     }
@@ -201,6 +191,8 @@ fun EditRepairShopScreen(
             longitude = it.data?.extras?.getDouble("longitude", 0.0) ?: 0.0
             Log.d("EDIT", "${it.data?.extras?.getDouble("latitude", 0.0)}")
             Log.d("EDIT", "${it.data?.extras?.getDouble("longitude", 0.0)}")
+        } else {
+            Log.d("EDIT", "No data")
         }
     }
 
@@ -390,19 +382,21 @@ fun EditRepairShopScreen(
                                             startWeekdayHoursState.hour,
                                             startWeekdayHoursState.minute
                                         )
-                                    ActiveTimePicker.END_WEEKDAYS -> endWeekdaysHours = convertTime(
-                                        endWeekdayHoursState.hour,
-                                        endWeekdayHoursState.minute
-                                    )
+                                    ActiveTimePicker.END_WEEKDAYS -> endWeekdaysHours =
+                                        convertTime(
+                                            endWeekdayHoursState.hour,
+                                            endWeekdayHoursState.minute
+                                        )
                                     ActiveTimePicker.START_WEEKEND -> startWeekendHours =
                                         convertTime(
                                             startWeekendHoursState.hour,
                                             startWeekendHoursState.minute
                                         )
-                                    ActiveTimePicker.END_WEEKEND -> endWeekendHours = convertTime(
-                                        endWeekendHoursState.hour,
-                                        endWeekendHoursState.minute
-                                    )
+                                    ActiveTimePicker.END_WEEKEND -> endWeekendHours =
+                                        convertTime(
+                                            endWeekendHoursState.hour,
+                                            endWeekendHoursState.minute
+                                        )
                                 }
                             },
                             selectedState = {

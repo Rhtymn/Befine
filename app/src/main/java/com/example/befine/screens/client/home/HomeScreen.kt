@@ -104,8 +104,6 @@ fun GetUserLocation() {
             modifier = Modifier.padding(bottom = 8.dp)
         )
     }
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

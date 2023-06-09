@@ -33,6 +33,7 @@ import com.example.befine.utils.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.example.befine.model.ROLE.REPAIR_SHOP_OWNER
+import com.example.befine.model.Schedule
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -127,12 +128,16 @@ fun RepairShopSignUpScreen(
                                     name = repairShopName,
                                     role = REPAIR_SHOP_OWNER.name
                                 )
+                                var schedules = mutableListOf<Schedule>()
+                                days.forEach {
+                                    schedules.add(Schedule(it))
+                                }
                                 val repairShopData = RepairShop(
                                     userId = auth.currentUser!!.uid,
                                     name = repairShopName,
-                                    photo = "default.jpg"
+                                    photo = "default.jpg",
+                                    schedule = schedules
                                 )
-
                                 val usersRef =
                                     db.collection("users").document(auth.currentUser!!.uid)
                                 val repairShopsRef = db.collection("repairShops")
@@ -146,6 +151,7 @@ fun RepairShopSignUpScreen(
                                 }.addOnFailureListener {
                                     isFailed = true
                                     formErrorMsg = SignUpError.FAILED
+                                    auth.currentUser!!.delete()
                                 }
 
                             }
@@ -259,7 +265,9 @@ fun RepairShopSignUpScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            RepairShopSignUpScreen(navigateToLogin = { /*TODO*/ }, navigateToUserRegister = { /*TODO*/ })
+            RepairShopSignUpScreen(
+                navigateToLogin = { /*TODO*/ },
+                navigateToUserRegister = { /*TODO*/ })
         }
     }
 }

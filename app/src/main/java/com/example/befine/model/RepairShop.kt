@@ -9,4 +9,5 @@ data class RepairShop(
     val longitude: String? = null,
     val phone_number: String? = null,
     val photo: String? = null,
+    val schedule: List<Schedule>? = null
 )

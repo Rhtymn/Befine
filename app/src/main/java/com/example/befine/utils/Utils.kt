@@ -12,6 +12,16 @@ object STATUS {
     const val CLOSED = "closed"
 }
 
+val days =
+    listOf(
+        Day.MONDAY,
+        Day.TUESDAY,
+        Day.WEDNESDAY,
+        Day.THURSDAY,
+        Day.FRIDAY,
+        Day.SATURDAY,
+        Day.SUNDAY
+    )
 object ActiveTimePicker {
     val START_WEEKDAYS = "startWeekdays"
     val END_WEEKDAYS = "endWeekdays"

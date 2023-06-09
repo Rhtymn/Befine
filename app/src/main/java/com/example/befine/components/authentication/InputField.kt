@@ -38,7 +38,8 @@ fun InputField(
     icon: @Composable (() -> Unit)? = null,
     readOnly: Boolean = false,
     enabled: Boolean = true,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    maxLines: Int = 1
 ) {
     if (icon != null) {
         if (isError) {
@@ -56,7 +57,8 @@ fun InputField(
                 label = { Text(label) },
                 readOnly = readOnly,
                 enabled = enabled,
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
+                maxLines = maxLines,
             )
         } else {
             OutlinedTextField(
@@ -72,7 +74,8 @@ fun InputField(
                 label = { Text(label) },
                 readOnly = readOnly,
                 enabled = enabled,
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
+                maxLines = maxLines
             )
         }
     } else {
@@ -90,7 +93,8 @@ fun InputField(
                 label = { Text(label) },
                 readOnly = readOnly,
                 enabled = enabled,
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
+                maxLines = maxLines
             )
         } else {
             OutlinedTextField(
@@ -105,7 +109,8 @@ fun InputField(
                 label = { Text(label) },
                 readOnly = readOnly,
                 enabled = enabled,
-                interactionSource = interactionSource
+                interactionSource = interactionSource,
+                maxLines = maxLines
             )
         }
     }

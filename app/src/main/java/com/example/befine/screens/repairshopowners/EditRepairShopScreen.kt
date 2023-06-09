@@ -12,8 +12,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -41,27 +41,9 @@ import com.example.befine.components.ui.repairshop.*
 import com.example.befine.utils.*
 import java.util.*
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.text.input.KeyboardType
+import com.example.befine.components.authentication.FilledButton
 import com.example.befine.components.ui.TopBar
-
-@Composable
-fun DayPicker(text: String, active: Boolean = false, onClick: () -> Unit) {
-    val backgroundColor = if (active) MaterialTheme.colorScheme.primary else Color.White
-    val textColor = if (active) Color.White else MaterialTheme.colorScheme.primary
-    val baseModifier = Modifier
-        .size(40.dp)
-        .clip(CircleShape)
-        .background(backgroundColor)
-    var modifier = baseModifier
-    if (!active) {
-        modifier = baseModifier.border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
-    }
-
-    Box(
-        modifier = modifier.clickable { onClick() }
-    ) {
-        Text(text = text, modifier = Modifier.align(Alignment.Center), color = textColor)
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +67,38 @@ fun EditRepairShopScreen(
     // State to save selected image uri
     var capturedImageUri by remember {
         mutableStateOf<Uri>(Uri.EMPTY)
+    }
+
+    // State related to repair shop name input field
+    var repairShopName by remember { mutableStateOf("") }
+    var isRepairShopError by remember { mutableStateOf(false) }
+    var repairShopErrorMsg by remember { mutableStateOf("") }
+
+    // State related to address input field
+    var address by remember { mutableStateOf("") }
+    var isAddressError by remember { mutableStateOf(false) }
+    var addressErrorMsg by remember { mutableStateOf("") }
+
+    // State related to description input field
+    var description by remember { mutableStateOf("") }
+    var isDescriptionError by remember { mutableStateOf(false) }
+    var descriptionErrorMsg by remember { mutableStateOf("") }
+
+    // State related to phone number input field
+    var phoneNumber by remember { mutableStateOf("") }
+    var isPhoneNumberError by remember { mutableStateOf(false) }
+    var phoneNumberErrorMsg by remember { mutableStateOf("") }
+
+    // Progress Indicator state
+    var isLoading by remember { mutableStateOf(false) }
+
+    // Form related state
+    var isFailed by remember { mutableStateOf(false) }
+    var formErrorMsg by remember { mutableStateOf("") }
+
+    fun resetFormState() {
+        isFailed = false
+        formErrorMsg = ""
     }
 
     // State related to time picker
@@ -116,6 +130,42 @@ fun EditRepairShopScreen(
         )
     val selectedDay = remember {
         mutableStateMapOf(*days.map { it to false }.toTypedArray())
+    }
+
+    fun resetInputField() {
+        repairShopName = ""
+        isRepairShopError = false
+        repairShopErrorMsg = ""
+
+        address = ""
+        isAddressError = false
+        addressErrorMsg = ""
+
+        description = ""
+        isDescriptionError = false
+        descriptionErrorMsg = ""
+
+        phoneNumber = ""
+        isPhoneNumberError = false
+        phoneNumberErrorMsg = ""
+
+        capturedImageUri = Uri.EMPTY
+
+        latitude = 0.0
+        longitude = 0.0
+
+        startWeekdayHours = "00:00"
+        endWeekdaysHours = "00:00"
+        startWeekendHours = "00:00"
+        endWeekendHours = "00:00"
+
+        selectedDay[Day.MONDAY] = false
+        selectedDay[Day.TUESDAY] = false
+        selectedDay[Day.WEDNESDAY] = false
+        selectedDay[Day.THURSDAY] = false
+        selectedDay[Day.FRIDAY] = false
+        selectedDay[Day.SATURDAY] = false
+        selectedDay[Day.SUNDAY] = false
     }
 
     // Launcher for taking image from camera by implicit intent
@@ -154,6 +204,10 @@ fun EditRepairShopScreen(
         }
     }
 
+    fun updateHandler() {
+        Log.d("EDIT", "Update!")
+    }
+
     fun onClickCameraButtonHandler() {
         // Check permission status
         val permissionCheckResult =
@@ -172,7 +226,8 @@ fun EditRepairShopScreen(
         galleryLauncher.launch("image/*")
     }
 
-    val address = if (latitude != 0.0 && longitude != 0.0) {
+    @Suppress("DEPRECATION")
+    val pickedAddress = if (latitude != 0.0 && longitude != 0.0) {
         val addressData = geocoder.getFromLocation(latitude, longitude, 1)
         "${addressData?.get(0)?.thoroughfare}, ${addressData?.get(0)?.locality}"
     } else {
@@ -218,16 +273,37 @@ fun EditRepairShopScreen(
                 }
             }
             InputField(
-                value = "",
-                onValueChange = {},
+                value = repairShopName,
+                onValueChange = { repairShopName = it },
+                isError = isRepairShopError,
+                errorMessage = repairShopErrorMsg,
                 label = "Repair Shop Name",
                 modifier = Modifier.padding(top = 10.dp)
             )
-            InputField(value = "", onValueChange = {}, label = "Address")
-            InputField(value = "", onValueChange = {}, label = "Description")
-            InputField(value = "", onValueChange = {}, label = "Telp / Phone Number")
+            InputField(
+                value = address,
+                onValueChange = { address = it },
+                isError = isAddressError,
+                errorMessage = addressErrorMsg,
+                label = "Address"
+            )
+            InputField(
+                value = description,
+                onValueChange = { description = it },
+                isError = isDescriptionError,
+                errorMessage = descriptionErrorMsg,
+                label = "Description"
+            )
+            InputField(
+                value = phoneNumber,
+                isError = isPhoneNumberError,
+                errorMessage = phoneNumberErrorMsg,
+                onValueChange = { phoneNumber = it },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                label = "Telp / Phone Number"
+            )
             PickerButton(
-                text = address,
+                text = pickedAddress,
                 icon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") },
             ) {
                 val locationPickerIntent =
@@ -290,6 +366,7 @@ fun EditRepairShopScreen(
                 startValue = startWeekendHours,
                 endValue = endWeekendHours
             )
+            FilledButton(text = "Update", isLoading = isLoading, onClick = { updateHandler() })
             if (showTimePickerDialog) {
                 Dialog(onDismissRequest = { showTimePickerDialog = false }) {
                     Column(

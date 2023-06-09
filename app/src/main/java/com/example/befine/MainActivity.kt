@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,9 +22,12 @@ import com.example.befine.screens.RepairShopSignUpScreen
 import com.example.befine.screens.SignUpScreen
 import com.example.befine.screens.chat.channel.ChannelScreen
 import com.example.befine.screens.client.HomeScreen
+import com.example.befine.screens.client.details.RepairShopDetailsScreen
 import com.example.befine.screens.profile.ProfileScreen
+import com.example.befine.screens.repairshopowners.EditRepairShopScreen
 import com.example.befine.screens.repairshopowners.RepairShopHome
 import com.example.befine.ui.theme.BefineTheme
+import com.example.befine.utils.ROLE
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +45,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BefineApp(
     modifier: Modifier = Modifier,
@@ -58,11 +63,15 @@ fun BefineApp(
         navController.navigate(Screen.RegisterUser.route)
     }
 
+    fun goToEditRepairShopScreen() = { -> navController.navigate(Screen.EditRepairShop.route) }
     val goToProfile: (role: String) -> Unit = { role ->
         navController.navigate(Screen.Profile.createRoute(role))
     }
 
-    NavHost(navController = navController, startDestination = Screen.Login.route) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Login.route,
+    ) {
         composable(Screen.Login.route) {
             LoginScreen(
                 navigateToUserRegister = goToRegisterUser(),
@@ -84,7 +93,7 @@ fun BefineApp(
         }
         composable(Screen.Home.route) {
             HomeScreen(
-                navigateToProfile = { goToProfile("REGULAR_USER") },
+                navigateToProfile = { goToProfile(ROLE.CLIENT) },
                 navigateToChatChannel = { navController.navigate(Screen.ChatChannel.route) }
             )
         }
@@ -93,15 +102,29 @@ fun BefineApp(
             arguments = listOf(navArgument("role") { type = NavType.StringType })
         ) {
             val role = it.arguments?.getString("role")
-            ProfileScreen(navigateToLogin = goToLogin(), role = role.toString())
+            ProfileScreen(
+                navigateToLogin = goToLogin(),
+                role = role.toString(),
+                navigateToEditRepairShop = goToEditRepairShopScreen(),
+                navigateToRegularUserHome = goToRegularHomeScreen(),
+                navigateToRepairShopHome = goToRepairShopHome()
+            )
         }
         composable(Screen.ChatChannel.route) {
             ChannelScreen()
         }
         composable(Screen.RepairShopHome.route) {
-            RepairShopHome(navigateToProfile = { goToProfile("REPAIR_SHOP_OWNER") })
+            RepairShopHome(navigateToProfile = { goToProfile(ROLE.REPAIR_SHOP_OWNER) })
+        }
+        composable(Screen.EditRepairShop.route) {
+            EditRepairShopScreen(navigateToProfileScreen = { goToProfile(ROLE.REPAIR_SHOP_OWNER) })
+        }
+        composable(Screen.Details.route) {
+            RepairShopDetailsScreen()
         }
     }
+
+
 }
 
 @Composable

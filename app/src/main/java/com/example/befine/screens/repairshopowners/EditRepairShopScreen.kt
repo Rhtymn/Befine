@@ -40,6 +40,8 @@ import com.example.befine.components.authentication.InputField
 import com.example.befine.components.ui.repairshop.*
 import com.example.befine.utils.*
 import java.util.*
+import androidx.compose.material3.Scaffold
+import com.example.befine.components.ui.TopBar
 
 @Composable
 fun DayPicker(text: String, active: Boolean = false, onClick: () -> Unit) {
@@ -64,6 +66,7 @@ fun DayPicker(text: String, active: Boolean = false, onClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRepairShopScreen(
+    navigateToProfileScreen: () -> Unit = {}
 ) {
     // Context for this composable component
     val context = LocalContext.current
@@ -176,156 +179,173 @@ fun EditRepairShopScreen(
         "Select location"
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical)
-            .verticalScroll(
-                rememberScrollState()
-            )
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
-        ) {
-            Image(
-                painter = if (capturedImageUri.path?.isNotEmpty() == true) rememberAsyncImagePainter(
-                    model = capturedImageUri,
-                    placeholder = painterResource(id = R.drawable.default_image)
-                ) else painterResource(id = R.drawable.default_image),
-                contentDescription = "",
-                modifier = Modifier.size(200.dp),
-                contentScale = ContentScale.Crop
-            )
-            Column {
-                LauncherButton(onClick = { onClickCameraButtonHandler() }, text = "Camera")
-                LauncherButton(onClick = { onClickGalleryButtonHandler() }, text = "Gallery")
+    Scaffold(
+        topBar = {
+            TopBar(title = "Edit Repair Shop") {
+                navigateToProfileScreen()
             }
         }
-        InputField(
-            value = "",
-            onValueChange = {},
-            label = "Repair Shop Name",
-            modifier = Modifier.padding(top = 10.dp)
-        )
-        InputField(value = "", onValueChange = {}, label = "Address")
-        InputField(value = "", onValueChange = {}, label = "Description")
-        InputField(value = "", onValueChange = {}, label = "Telp / Phone Number")
-        PickerButton(
-            text = address,
-            icon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") },
-        ) {
-            val locationPickerIntent = LocationPickerActivity.Builder().build(context as Activity)
-            locationPickerLauncher.launch(Intent(locationPickerIntent))
-        }
-        Row(
-            horizontalArrangement = Arrangement.SpaceAround,
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(innerPadding)
+                .padding(
+                    horizontal =
+                    Screen.paddingHorizontal, vertical = Screen.paddingVertical
+                )
+                .verticalScroll(
+                    rememberScrollState()
+                )
         ) {
-            DayPicker(text = "M", selectedDay[Day.MONDAY]!!) {
-                selectedDay[Day.MONDAY] = !selectedDay[Day.MONDAY]!!
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Image(
+                    painter = if (capturedImageUri.path?.isNotEmpty() == true) rememberAsyncImagePainter(
+                        model = capturedImageUri,
+                        placeholder = painterResource(id = R.drawable.default_image)
+                    ) else painterResource(id = R.drawable.default_image),
+                    contentDescription = "",
+                    modifier = Modifier.size(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+                Column {
+                    LauncherButton(onClick = { onClickCameraButtonHandler() }, text = "Camera")
+                    LauncherButton(onClick = { onClickGalleryButtonHandler() }, text = "Gallery")
+                }
             }
-            DayPicker(text = "T", selectedDay[Day.TUESDAY]!!) {
-                selectedDay[Day.TUESDAY] = !selectedDay[Day.TUESDAY]!!
+            InputField(
+                value = "",
+                onValueChange = {},
+                label = "Repair Shop Name",
+                modifier = Modifier.padding(top = 10.dp)
+            )
+            InputField(value = "", onValueChange = {}, label = "Address")
+            InputField(value = "", onValueChange = {}, label = "Description")
+            InputField(value = "", onValueChange = {}, label = "Telp / Phone Number")
+            PickerButton(
+                text = address,
+                icon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") },
+            ) {
+                val locationPickerIntent =
+                    LocationPickerActivity.Builder().build(context as Activity)
+                locationPickerLauncher.launch(Intent(locationPickerIntent))
             }
-            DayPicker(text = "W", selectedDay[Day.WEDNESDAY]!!) {
-                selectedDay[Day.WEDNESDAY] = !selectedDay[Day.WEDNESDAY]!!
+            Row(
+                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                DayPicker(text = "M", selectedDay[Day.MONDAY]!!) {
+                    selectedDay[Day.MONDAY] = !selectedDay[Day.MONDAY]!!
+                }
+                DayPicker(text = "T", selectedDay[Day.TUESDAY]!!) {
+                    selectedDay[Day.TUESDAY] = !selectedDay[Day.TUESDAY]!!
+                }
+                DayPicker(text = "W", selectedDay[Day.WEDNESDAY]!!) {
+                    selectedDay[Day.WEDNESDAY] = !selectedDay[Day.WEDNESDAY]!!
+                }
+                DayPicker(text = "T", selectedDay[Day.THURSDAY]!!) {
+                    selectedDay[Day.THURSDAY] = !selectedDay[Day.THURSDAY]!!
+                }
+                DayPicker(text = "F", selectedDay[Day.FRIDAY]!!) {
+                    selectedDay[Day.FRIDAY] = !selectedDay[Day.FRIDAY]!!
+                }
+                DayPicker(text = "S", selectedDay[Day.SATURDAY]!!) {
+                    selectedDay[Day.SATURDAY] = !selectedDay[Day.SATURDAY]!!
+                }
+                DayPicker(text = "S", selectedDay[Day.SUNDAY]!!) {
+                    selectedDay[Day.SUNDAY] = !selectedDay[Day.SUNDAY]!!
+                }
             }
-            DayPicker(text = "T", selectedDay[Day.THURSDAY]!!) {
-                selectedDay[Day.THURSDAY] = !selectedDay[Day.THURSDAY]!!
-            }
-            DayPicker(text = "F", selectedDay[Day.FRIDAY]!!) {
-                selectedDay[Day.FRIDAY] = !selectedDay[Day.FRIDAY]!!
-            }
-            DayPicker(text = "S", selectedDay[Day.SATURDAY]!!) {
-                selectedDay[Day.SATURDAY] = !selectedDay[Day.SATURDAY]!!
-            }
-            DayPicker(text = "S", selectedDay[Day.SUNDAY]!!) {
-                selectedDay[Day.SUNDAY] = !selectedDay[Day.SUNDAY]!!
-            }
-        }
-        TimeInputRange(
-            label = "Weekday Hours",
-            enabled = selectedDay[Day.MONDAY]!! || selectedDay[Day.TUESDAY]!! || selectedDay[Day.WEDNESDAY]!! || selectedDay[Day.THURSDAY]!! || selectedDay[Day.FRIDAY]!!,
-            onPickStartTime = {
-                showTimePickerDialog = true
-                activeSelectedTimePicker = ActiveTimePicker.START_WEEKDAYS
-            },
-            onPickEndTime = {
-                showTimePickerDialog = true
-                activeSelectedTimePicker = ActiveTimePicker.END_WEEKDAYS
-            },
-            startValue = startWeekdayHours,
-            endValue = endWeekdaysHours
-        )
-        TimeInputRange(
-            label = "Weekend Hours",
-            enabled = selectedDay[Day.SATURDAY]!! || selectedDay[Day.SUNDAY]!!,
-            onPickStartTime = {
-                showTimePickerDialog = true
-                activeSelectedTimePicker = ActiveTimePicker.START_WEEKEND
-            },
-            onPickEndTime = {
-                showTimePickerDialog = true
-                activeSelectedTimePicker = ActiveTimePicker.END_WEEKEND
-            },
-            startValue = startWeekendHours,
-            endValue = endWeekendHours
-        )
-        if (showTimePickerDialog) {
-            Dialog(onDismissRequest = { showTimePickerDialog = false }) {
-                Column(
-                    modifier = Modifier
-                        .background(Color.White)
-                        .clip(
-                            RoundedCornerShape(
-                                14.dp
+            TimeInputRange(
+                label = "Weekday Hours",
+                enabled = selectedDay[Day.MONDAY]!! || selectedDay[Day.TUESDAY]!! || selectedDay[Day.WEDNESDAY]!! || selectedDay[Day.THURSDAY]!! || selectedDay[Day.FRIDAY]!!,
+                onPickStartTime = {
+                    showTimePickerDialog = true
+                    activeSelectedTimePicker = ActiveTimePicker.START_WEEKDAYS
+                },
+                onPickEndTime = {
+                    showTimePickerDialog = true
+                    activeSelectedTimePicker = ActiveTimePicker.END_WEEKDAYS
+                },
+                startValue = startWeekdayHours,
+                endValue = endWeekdaysHours
+            )
+            TimeInputRange(
+                label = "Weekend Hours",
+                enabled = selectedDay[Day.SATURDAY]!! || selectedDay[Day.SUNDAY]!!,
+                onPickStartTime = {
+                    showTimePickerDialog = true
+                    activeSelectedTimePicker = ActiveTimePicker.START_WEEKEND
+                },
+                onPickEndTime = {
+                    showTimePickerDialog = true
+                    activeSelectedTimePicker = ActiveTimePicker.END_WEEKEND
+                },
+                startValue = startWeekendHours,
+                endValue = endWeekendHours
+            )
+            if (showTimePickerDialog) {
+                Dialog(onDismissRequest = { showTimePickerDialog = false }) {
+                    Column(
+                        modifier = Modifier
+                            .background(Color.White)
+                            .clip(
+                                RoundedCornerShape(
+                                    14.dp
+                                )
                             )
+                            .padding(horizontal = 20.dp, vertical = 14.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CustomTimePicker(
+                            onCancel = { showTimePickerDialog = false },
+                            onConfirm = {
+                                showTimePickerDialog = false
+                                when (activeSelectedTimePicker) {
+                                    ActiveTimePicker.START_WEEKDAYS -> startWeekdayHours =
+                                        convertTime(
+                                            startWeekdayHoursState.hour,
+                                            startWeekdayHoursState.minute
+                                        )
+                                    ActiveTimePicker.END_WEEKDAYS -> endWeekdaysHours = convertTime(
+                                        endWeekdayHoursState.hour,
+                                        endWeekdayHoursState.minute
+                                    )
+                                    ActiveTimePicker.START_WEEKEND -> startWeekendHours =
+                                        convertTime(
+                                            startWeekendHoursState.hour,
+                                            startWeekendHoursState.minute
+                                        )
+                                    ActiveTimePicker.END_WEEKEND -> endWeekendHours = convertTime(
+                                        endWeekendHoursState.hour,
+                                        endWeekendHoursState.minute
+                                    )
+                                }
+                            },
+                            selectedState = {
+                                when (it) {
+                                    ActiveTimePicker.START_WEEKDAYS -> startWeekdayHoursState
+                                    ActiveTimePicker.END_WEEKDAYS -> endWeekdayHoursState
+                                    ActiveTimePicker.START_WEEKEND -> startWeekendHoursState
+                                    else -> endWeekendHoursState
+                                }
+                            },
+                            activeTimePicker = activeSelectedTimePicker,
+                            buttonContainerModifier = Modifier.align(Alignment.End)
                         )
-                        .padding(horizontal = 20.dp, vertical = 14.dp),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CustomTimePicker(
-                        onCancel = { showTimePickerDialog = false },
-                        onConfirm = {
-                            showTimePickerDialog = false
-                            when (activeSelectedTimePicker) {
-                                ActiveTimePicker.START_WEEKDAYS -> startWeekdayHours = convertTime(
-                                    startWeekdayHoursState.hour,
-                                    startWeekdayHoursState.minute
-                                )
-                                ActiveTimePicker.END_WEEKDAYS -> endWeekdaysHours = convertTime(
-                                    endWeekdayHoursState.hour,
-                                    endWeekdayHoursState.minute
-                                )
-                                ActiveTimePicker.START_WEEKEND -> startWeekendHours = convertTime(
-                                    startWeekendHoursState.hour,
-                                    startWeekendHoursState.minute
-                                )
-                                ActiveTimePicker.END_WEEKEND -> endWeekendHours = convertTime(
-                                    endWeekendHoursState.hour,
-                                    endWeekendHoursState.minute
-                                )
-                            }
-                        },
-                        selectedState = {
-                            when (it) {
-                                ActiveTimePicker.START_WEEKDAYS -> startWeekdayHoursState
-                                ActiveTimePicker.END_WEEKDAYS -> endWeekdayHoursState
-                                ActiveTimePicker.START_WEEKEND -> startWeekendHoursState
-                                else -> endWeekendHoursState
-                            }
-                        },
-                        activeTimePicker = activeSelectedTimePicker,
-                        buttonContainerModifier = Modifier.align(Alignment.End)
-                    )
+                    }
                 }
             }
         }
     }
+
+
 }
 
 @Preview

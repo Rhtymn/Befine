@@ -8,12 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun PickerButton(text: String, icon: @Composable (() -> Unit)? = null) {
+fun PickerButton(text: String, icon: @Composable (() -> Unit)? = null, onClick: () -> Unit) {
     OutlinedButton(
-        onClick = { /*TODO*/ },
+        onClick = { onClick() },
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()
@@ -29,7 +30,13 @@ fun PickerButton(text: String, icon: @Composable (() -> Unit)? = null) {
             if (icon != null) {
                 icon()
             }
-            Text(text = text, color = Color.Black)
+            Text(
+                text = text,
+                color = Color.Black,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(start = 6.dp)
+            )
         }
     }
 }

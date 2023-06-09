@@ -1,8 +1,12 @@
 package com.example.befine.screens.repairshopowners
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,6 +32,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
+import com.adevinta.leku.*
 import com.example.befine.BuildConfig
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.R
@@ -63,6 +68,8 @@ fun EditRepairShopScreen(
     // Context for this composable component
     val context = LocalContext.current
 
+    // Geocoder to convert lat & lon to address
+    val geocoder = Geocoder(context)
 
     // Create file object with unique file name that can be used to store the captured image.
     // stores it in external cache directory
@@ -88,6 +95,10 @@ fun EditRepairShopScreen(
     var endWeekdaysHours by remember { mutableStateOf("00:00") }
     var startWeekendHours by remember { mutableStateOf("00:00") }
     var endWeekendHours by remember { mutableStateOf("00:00") }
+
+    // State related to location picker
+    var latitude by remember { mutableStateOf(0.0) }
+    var longitude by remember { mutableStateOf(0.0) }
 
     // State related to selected day
     val days =
@@ -129,6 +140,17 @@ fun EditRepairShopScreen(
         }
     }
 
+    val locationPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            latitude = it.data?.extras?.getDouble("latitude", 0.0) ?: 0.0
+            longitude = it.data?.extras?.getDouble("longitude", 0.0) ?: 0.0
+            Log.d("EDIT", "${it.data?.extras?.getDouble("latitude", 0.0)}")
+            Log.d("EDIT", "${it.data?.extras?.getDouble("longitude", 0.0)}")
+        }
+    }
+
     fun onClickCameraButtonHandler() {
         // Check permission status
         val permissionCheckResult =
@@ -145,6 +167,13 @@ fun EditRepairShopScreen(
 
     fun onClickGalleryButtonHandler() {
         galleryLauncher.launch("image/*")
+    }
+
+    val address = if (latitude != 0.0 && longitude != 0.0) {
+        val addressData = geocoder.getFromLocation(latitude, longitude, 1)
+        "${addressData?.get(0)?.thoroughfare}, ${addressData?.get(0)?.locality}"
+    } else {
+        "Select location"
     }
 
     Column(
@@ -184,9 +213,12 @@ fun EditRepairShopScreen(
         InputField(value = "", onValueChange = {}, label = "Description")
         InputField(value = "", onValueChange = {}, label = "Telp / Phone Number")
         PickerButton(
-            text = "Select Location",
-            icon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") }
-        )
+            text = address,
+            icon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") },
+        ) {
+            val locationPickerIntent = LocationPickerActivity.Builder().build(context as Activity)
+            locationPickerLauncher.launch(Intent(locationPickerIntent))
+        }
         Row(
             horizontalArrangement = Arrangement.SpaceAround,
             modifier = Modifier

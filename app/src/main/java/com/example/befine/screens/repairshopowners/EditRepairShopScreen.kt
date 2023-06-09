@@ -44,11 +44,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.befine.components.authentication.FilledButton
 import com.example.befine.components.ui.TopBar
+import com.example.befine.firebase.Storage
+import com.example.befine.model.RepairShop
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObjects
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRepairShopScreen(
-    navigateToProfileScreen: () -> Unit = {}
+    navigateToProfileScreen: () -> Unit = {},
+    db: FirebaseFirestore = Firebase.firestore,
+    storage: FirebaseStorage = Storage.getInstance().getStorage()
 ) {
     // Context for this composable component
     val context = LocalContext.current
@@ -226,6 +236,43 @@ fun EditRepairShopScreen(
         "Select location"
     }
 
+    LaunchedEffect(true) {
+        val repairShop: List<RepairShop> =
+            db.collection("repairShops").whereEqualTo("userId", "SZq3KQPSFpghMPut5wlmVKFmxxj1")
+                .get().await().toObjects()
+        val data = repairShop[0]
+        repairShopName = if (data.name.isNullOrBlank()) "" else data.name.toString()
+        address = if (data.address.isNullOrBlank()) "" else data.address.toString()
+        description = if (data.description.isNullOrBlank()) "" else data.description.toString()
+        phoneNumber = if (data.phone_number.isNullOrBlank()) "" else data.phone_number.toString()
+        latitude = if (data.latitude.isNullOrBlank()) 0.0 else data.latitude.toDouble()
+        longitude = if (data.longitude.isNullOrBlank()) 0.0 else data.longitude.toDouble()
+
+        for (i in 0..6) {
+            selectedDay[days[i]] =
+                if (data.schedule?.get(i)?.status.isNullOrBlank()) false else data.schedule?.get(i)?.status == "open"
+
+            if (i < 5) { // weekdays
+                if (!data.schedule?.get(i)?.operationalHours.isNullOrBlank()) {
+                    startWeekdayHours = data.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
+                    endWeekdaysHours = data.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
+                }
+            } else {
+                if (!data.schedule?.get(i)?.operationalHours.isNullOrBlank()) {
+                    startWeekendHours = data.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
+                    endWeekendHours = data.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
+                }
+            }
+        }
+
+        if (!data.photo.isNullOrBlank()) {
+            val imageRef = storage.reference.child("images/${data.photo}")
+            imageRef.downloadUrl.addOnSuccessListener { uri ->
+                capturedImageUri = uri
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopBar(title = "Edit Repair Shop") {
@@ -277,6 +324,7 @@ fun EditRepairShopScreen(
                 onValueChange = { address = it },
                 isError = isAddressError,
                 errorMessage = addressErrorMsg,
+                maxLines = 2,
                 label = "Address"
             )
             InputField(
@@ -284,6 +332,7 @@ fun EditRepairShopScreen(
                 onValueChange = { description = it },
                 isError = isDescriptionError,
                 errorMessage = descriptionErrorMsg,
+                maxLines = 3,
                 label = "Description"
             )
             InputField(

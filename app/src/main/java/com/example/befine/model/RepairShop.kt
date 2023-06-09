@@ -1,5 +1,7 @@
 package com.example.befine.model
 
+import androidx.compose.runtime.MutableState
+
 data class RepairShop(
     val userId: String? = null,
     val name: String? = null,

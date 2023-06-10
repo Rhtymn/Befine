@@ -3,6 +3,7 @@ package com.example.befine.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.ui.unit.dp
+import com.example.befine.model.Schedule
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -122,4 +123,34 @@ fun Context.createImageFile(): File {
         ".jpg",
         externalCacheDir
     )
+}
+
+fun isRepairShopOpen(schedule: List<Schedule>): String {
+    // Current time
+    val calendar = Calendar.getInstance()
+    val day = calendar.get(Calendar.DAY_OF_WEEK)
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val minute = calendar.get(Calendar.MINUTE)
+
+    val scheduleOnThisDay = schedule[if (day == 1) 6 else day - 2]
+    val openHour = scheduleOnThisDay.operationalHours.toString().slice(0..1).toInt()
+    val openMinute = scheduleOnThisDay.operationalHours.toString().slice(3..4).toInt()
+    val closeHour = scheduleOnThisDay.operationalHours.toString().slice(6..7).toInt()
+    val closeMinute = scheduleOnThisDay.operationalHours.toString().slice(9..10).toInt()
+
+    return if (scheduleOnThisDay.status == "closed") {
+        STATUS.CLOSED
+    } else {
+        if (hour in openHour..closeHour) {
+            if (hour == closeHour && minute > closeMinute) {
+                STATUS.CLOSED
+            } else if (hour == openHour && minute < openMinute) {
+                STATUS.CLOSED
+            } else {
+                STATUS.OPEN
+            }
+        } else {
+            STATUS.CLOSED
+        }
+    }
 }

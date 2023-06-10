@@ -9,7 +9,6 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -36,9 +35,9 @@ import com.example.befine.di.Injection
 import com.example.befine.model.RepairShopWithId
 import com.example.befine.screens.client.home.HomeViewModel
 import com.example.befine.ui.theme.BefineTheme
-import com.example.befine.utils.STATUS
 import com.example.befine.utils.Screen
 import com.example.befine.utils.ViewModelFactory
+import com.example.befine.utils.isRepairShopOpen
 
 private const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -107,7 +106,6 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(factory = ViewModelFactory(Injection.provideRepairShopRepository())),
 ) {
     val data = homeViewModel.getAllRepairShop()
-    Log.d("HOME", data.toString())
     Scaffold(
         topBar = {
             TopAppBar(
@@ -184,7 +182,7 @@ fun NearbyShopList(data: List<RepairShopWithId>) {
             NearbyRepairShopItem(
                 name = it.repairShop.name.toString(),
                 distance = "0.7 km",
-                status = STATUS.CLOSED,
+                status = isRepairShopOpen(it.repairShop.schedule!!),
                 image = it.repairShop.photo.toString()
             )
         }
@@ -197,7 +195,7 @@ fun OthersList(data: List<RepairShopWithId>) {
         items(data, key = { it.id }) {
             RepairShopItem(
                 name = it.repairShop.name.toString(),
-                status = STATUS.OPEN,
+                status = isRepairShopOpen(it.repairShop.schedule!!),
                 address = it.repairShop.address.toString(),
                 image = it.repairShop.photo.toString()
             )

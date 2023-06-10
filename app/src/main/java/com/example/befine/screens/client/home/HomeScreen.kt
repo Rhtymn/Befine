@@ -9,6 +9,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -32,7 +33,7 @@ import com.example.befine.components.ui.NearbyRepairShopItem
 import com.example.befine.components.ui.RepairShopItem
 import com.example.befine.components.ui.UserLocation
 import com.example.befine.di.Injection
-import com.example.befine.model.RepairShop
+import com.example.befine.model.RepairShopWithId
 import com.example.befine.screens.client.home.HomeViewModel
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.STATUS
@@ -59,14 +60,6 @@ fun GetUserLocation() {
             @Deprecated("Deprecated in Java")
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
                 super.onStatusChanged(provider, status, extras)
-            }
-
-            override fun onProviderEnabled(provider: String) {
-                super.onProviderEnabled(provider)
-            }
-
-            override fun onProviderDisabled(provider: String) {
-                super.onProviderDisabled(provider)
             }
         }
 
@@ -114,6 +107,7 @@ fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(factory = ViewModelFactory(Injection.provideRepairShopRepository())),
 ) {
     val data = homeViewModel.getAllRepairShop()
+    Log.d("HOME", data.toString())
     Scaffold(
         topBar = {
             TopAppBar(
@@ -184,26 +178,28 @@ fun HeaderText(value: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun NearbyShopList(data: List<RepairShop>) {
+fun NearbyShopList(data: List<RepairShopWithId>) {
     LazyRow(modifier = Modifier.padding(bottom = 24.dp)) {
-        items(data, key = { "${it.latitude}-${it.longitude}" }) {
+        items(data, key = { it.id }) {
             NearbyRepairShopItem(
-                name = it.name.toString(),
+                name = it.repairShop.name.toString(),
                 distance = "0.7 km",
-                status = STATUS.CLOSED
+                status = STATUS.CLOSED,
+                image = it.repairShop.photo.toString()
             )
         }
     }
 }
 
 @Composable
-fun OthersList(data: List<RepairShop>) {
+fun OthersList(data: List<RepairShopWithId>) {
     LazyColumn() {
-        items(data, key = { "${it.latitude}-${it.longitude}" }) {
+        items(data, key = { it.id }) {
             RepairShopItem(
-                name = it.name.toString(),
+                name = it.repairShop.name.toString(),
                 status = STATUS.OPEN,
-                address = it.address.toString()
+                address = it.repairShop.address.toString(),
+                image = it.repairShop.photo.toString()
             )
         }
     }

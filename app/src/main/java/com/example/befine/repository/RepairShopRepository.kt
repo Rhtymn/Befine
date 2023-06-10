@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.example.befine.model.RepairShop
+import com.google.android.gms.tasks.Tasks.await
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.runBlocking
@@ -32,13 +33,15 @@ class RepairShopRepository(val db: FirebaseFirestore = Firebase.firestore) {
         }
     }
 
-    fun getRepairShops(): MutableList<RepairShop> {
-        val result = mutableListOf<RepairShop>()
+    fun getRepairShops(): MutableMap<String, RepairShop> {
+        // val result = mutableListOf<RepairShop>()
+        var result = mutableMapOf<String, RepairShop>()
         runBlocking {
             try {
                 db.collection("repairShops").get().await().map { document ->
                     val repairShop = document.toObject<RepairShop>()
-                    result.add(repairShop)
+                    // result.add(repairShop)
+                    result[document.id] = repairShop
                 }
             } catch (e: FirebaseFirestoreException) {
                 Log.d("REPAIR_SHOP", e.message.toString())

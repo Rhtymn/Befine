@@ -73,7 +73,7 @@ fun EditRepairShopScreen(
 
     // Create file object with unique file name that can be used to store the captured image.
     // stores it in external cache directory
-    val file = context.createImageFile()
+    var file = context.createImageFile()
     val uri = FileProvider.getUriForFile(
         Objects.requireNonNull(context),
         BuildConfig.APPLICATION_ID + ".provider", file
@@ -168,8 +168,10 @@ fun EditRepairShopScreen(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) {
-        capturedImageUri = uri
-        isUserUploadFile = true
+        if (it != null) {
+            capturedImageUri = it
+            isUserUploadFile = true
+        }
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -203,6 +205,8 @@ fun EditRepairShopScreen(
 
         if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
             // Launch Camera
+            file.delete()
+            file = context.createImageFile()
             cameraLauncher.launch(uri)
         } else {
             // Request a permission
@@ -225,46 +229,51 @@ fun EditRepairShopScreen(
         "Select location"
     }
 
+    Log.d("EDIT", capturedImageUri.toString())
+
     LaunchedEffect(true) {
         val repairShop: RepairShop =
             db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2")
                 .get().await().toObject<RepairShop>() ?: RepairShop()
-        val data = repairShop
-        repairShopName = if (data.name.isNullOrBlank()) "" else data.name.toString()
-        address = if (data.address.isNullOrBlank()) "" else data.address.toString()
-        description = if (data.description.isNullOrBlank()) "" else data.description.toString()
-        phoneNumber = if (data.phone_number.isNullOrBlank()) "" else data.phone_number.toString()
-        latitude = if (data.latitude.isNullOrBlank()) 0.0 else data.latitude.toDouble()
-        longitude = if (data.longitude.isNullOrBlank()) 0.0 else data.longitude.toDouble()
+
+        repairShopName = if (repairShop.name.isNullOrBlank()) "" else repairShop.name.toString()
+        address = if (repairShop.address.isNullOrBlank()) "" else repairShop.address.toString()
+        description = if (repairShop.description.isNullOrBlank()) "" else repairShop.description.toString()
+        phoneNumber = if (repairShop.phone_number.isNullOrBlank()) "" else repairShop.phone_number.toString()
+        latitude = if (repairShop.latitude.isNullOrBlank()) 0.0 else repairShop.latitude.toDouble()
+        longitude = if (repairShop.longitude.isNullOrBlank()) 0.0 else repairShop.longitude.toDouble()
 
         for (i in 0..6) {
             selectedDay[days[i]] =
-                if (data.schedule?.get(i)?.status.isNullOrBlank()) false else data.schedule?.get(i)?.status == "open"
+                if (repairShop.schedule?.get(i)?.status.isNullOrBlank()) false else repairShop.schedule?.get(
+                    i
+                )?.status == "open"
 
             if (i < 5) { // weekdays
-                if (!data.schedule?.get(i)?.operationalHours.isNullOrBlank()) {
+                if (!repairShop.schedule?.get(i)?.operationalHours.isNullOrBlank()) {
                     startWeekdayHours =
-                        data.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
+                        repairShop.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
                     endWeekdaysHours =
-                        data.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
+                        repairShop.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
                 }
             } else {
-                if (!data.schedule?.get(i)?.operationalHours.isNullOrBlank()) {
+                if (!repairShop.schedule?.get(i)?.operationalHours.isNullOrBlank()) {
                     startWeekendHours =
-                        data.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
+                        repairShop.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
                     endWeekendHours =
-                        data.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
+                        repairShop.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
                 }
             }
         }
 
-        if (!data.photo.isNullOrBlank()) {
-            val imageRef = storage.reference.child("images/${data.photo}")
+        if (!repairShop.photo.isNullOrBlank()) {
+            val imageRef = storage.reference.child("images/${repairShop.photo}")
             imageRef.downloadUrl.addOnSuccessListener { uri ->
                 capturedImageUri = uri
             }
         }
     }
+
 
     fun updateDataHandler() {
         try {
@@ -336,7 +345,8 @@ fun EditRepairShopScreen(
 
                     }
                 }
-                val photo = if (isUserUploadFile) "briWG2CqTAe7SVYEf3AYN2O42tq2.jpg" else "default.jpg"
+                val photo =
+                    if (isUserUploadFile) "briWG2CqTAe7SVYEf3AYN2O42tq2.jpg" else "default.jpg"
 
                 val newRepairShopData = RepairShop(
                     name = repairShopName,
@@ -574,8 +584,6 @@ fun EditRepairShopScreen(
             }
         }
     }
-
-
 }
 
 @Preview

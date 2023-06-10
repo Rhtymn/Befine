@@ -133,21 +133,20 @@ fun RepairShopSignUpScreen(
                                     schedules.add(Schedule(it))
                                 }
                                 val repairShopData = RepairShop(
-                                    userId = auth.currentUser!!.uid,
                                     name = repairShopName,
                                     photo = "default.jpg",
                                     schedule = schedules
                                 )
                                 val usersRef =
                                     db.collection("users").document(auth.currentUser!!.uid)
-                                val repairShopsRef = db.collection("repairShops")
+                                val repairShopsRef = db.collection("repairShops").document(auth.currentUser!!.uid)
 
                                 db.runBatch {
                                     // Create users in firestore database
                                     usersRef.set(user)
 
                                     // Create repairShops in firestore data
-                                    repairShopsRef.add(repairShopData)
+                                    repairShopsRef.set(repairShopData)
                                 }.addOnFailureListener {
                                     isFailed = true
                                     formErrorMsg = SignUpError.FAILED

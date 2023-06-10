@@ -46,12 +46,14 @@ import com.example.befine.components.authentication.FilledButton
 import com.example.befine.components.ui.TopBar
 import com.example.befine.firebase.Storage
 import com.example.befine.model.RepairShop
+import com.example.befine.model.Schedule
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObjects
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
+import kotlin.collections.List
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -231,16 +233,19 @@ fun EditRepairShopScreen(
     @Suppress("DEPRECATION")
     val pickedAddress = if (latitude != 0.0 && longitude != 0.0) {
         val addressData = geocoder.getFromLocation(latitude, longitude, 1)
-        "${addressData?.get(0)?.thoroughfare}, ${addressData?.get(0)?.locality}"
+
+        val addressLine = addressData?.get(0)?.getAddressLine(0)
+
+        "$addressLine"
     } else {
         "Select location"
     }
 
     LaunchedEffect(true) {
-        val repairShop: List<RepairShop> =
-            db.collection("repairShops").whereEqualTo("userId", "SZq3KQPSFpghMPut5wlmVKFmxxj1")
-                .get().await().toObjects()
-        val data = repairShop[0]
+        val repairShop: RepairShop =
+            db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2")
+                .get().await().toObject<RepairShop>() ?: RepairShop()
+        val data = repairShop
         repairShopName = if (data.name.isNullOrBlank()) "" else data.name.toString()
         address = if (data.address.isNullOrBlank()) "" else data.address.toString()
         description = if (data.description.isNullOrBlank()) "" else data.description.toString()
@@ -254,13 +259,17 @@ fun EditRepairShopScreen(
 
             if (i < 5) { // weekdays
                 if (!data.schedule?.get(i)?.operationalHours.isNullOrBlank()) {
-                    startWeekdayHours = data.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
-                    endWeekdaysHours = data.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
+                    startWeekdayHours =
+                        data.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
+                    endWeekdaysHours =
+                        data.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
                 }
             } else {
                 if (!data.schedule?.get(i)?.operationalHours.isNullOrBlank()) {
-                    startWeekendHours = data.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
-                    endWeekendHours = data.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
+                    startWeekendHours =
+                        data.schedule?.get(i)?.operationalHours?.slice(0..4) ?: "00:00"
+                    endWeekendHours =
+                        data.schedule?.get(i)?.operationalHours?.slice(6..10) ?: "00:00"
                 }
             }
         }
@@ -270,6 +279,102 @@ fun EditRepairShopScreen(
             imageRef.downloadUrl.addOnSuccessListener { uri ->
                 capturedImageUri = uri
             }
+        }
+    }
+
+    fun updateDataHandler() {
+        try {
+            isLoading = true
+
+            // repair shop name validation
+            inputFieldValidation(repairShopName) {
+                isRepairShopError = true
+                repairShopErrorMsg = "Required"
+            }
+
+            // address validation
+            inputFieldValidation(address) {
+                isAddressError = true
+                addressErrorMsg = "Required"
+            }
+
+            // description validation
+            inputFieldValidation(description) {
+                isDescriptionError = true
+                descriptionErrorMsg = "Required"
+            }
+
+            // phone number validation
+            inputFieldValidation(phoneNumber) {
+                isPhoneNumberError = true
+                phoneNumberErrorMsg = "Required"
+            }
+
+            if (phoneNumber.length < 10) {
+                isPhoneNumberError = true
+                phoneNumberErrorMsg = "Minimum 10 characters"
+            } else if (phoneNumber.length > 15) {
+                isPhoneNumberError = true
+                phoneNumber = "Maximum 15 characters"
+            }
+
+            // Checking error availability
+            if (!isRepairShopError && !isAddressError && !isDescriptionError && !isPhoneNumberError) {
+
+                var newSchedules = mutableListOf<Schedule>()
+                for (i in 0..6) {
+                    val day = days[i]
+                    val status = if (selectedDay[days[i]] == true) "open" else "closed"
+
+                    if (i < 5) { // weekdays
+                        val operationalHours =
+                            if (status == "open") "${startWeekdayHours}—${endWeekdaysHours}" else null
+
+                        newSchedules.add(
+                            Schedule(
+                                day = day,
+                                status = status,
+                                operationalHours = operationalHours
+                            )
+                        )
+
+                    } else { // weekend
+                        val operationalHours =
+                            if (status == "open") "${startWeekendHours}—${endWeekendHours}" else null
+
+                        newSchedules.add(
+                            Schedule(
+                                day = day,
+                                status = status,
+                                operationalHours = operationalHours
+                            )
+                        )
+
+                    }
+                }
+
+                val newRepairShopData = RepairShop(
+                    name = repairShopName,
+                    address = address,
+                    description = description,
+                    latitude = latitude.toString(),
+                    longitude = longitude.toString(),
+                    phone_number = phoneNumber,
+                    photo = "default.jpg",
+                    schedule = newSchedules
+                )
+
+                // update process
+                db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2")
+                    .set(newRepairShopData).addOnSuccessListener {
+                        isLoading = false
+                        Toast.makeText(context, "Update success", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener {
+                        Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
+                    }
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -407,7 +512,7 @@ fun EditRepairShopScreen(
                 startValue = startWeekendHours,
                 endValue = endWeekendHours
             )
-            FilledButton(text = "Update", isLoading = isLoading, onClick = { updateHandler() })
+            FilledButton(text = "Update", isLoading = isLoading, onClick = { updateDataHandler() })
             if (showTimePickerDialog) {
                 Dialog(onDismissRequest = { showTimePickerDialog = false }) {
                     Column(

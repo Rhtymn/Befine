@@ -186,7 +186,7 @@ fun HeaderText(value: String, modifier: Modifier = Modifier) {
 @Composable
 fun NearbyShopList(data: List<RepairShop>) {
     LazyRow(modifier = Modifier.padding(bottom = 24.dp)) {
-        items(data, key = { it.userId.toString() }) {
+        items(data, key = { "${it.latitude}-${it.longitude}" }) {
             NearbyRepairShopItem(
                 name = it.name.toString(),
                 distance = "0.7 km",
@@ -199,7 +199,7 @@ fun NearbyShopList(data: List<RepairShop>) {
 @Composable
 fun OthersList(data: List<RepairShop>) {
     LazyColumn() {
-        items(data, key = { it.userId.toString() }) {
+        items(data, key = { "${it.latitude}-${it.longitude}" }) {
             RepairShopItem(
                 name = it.name.toString(),
                 status = STATUS.OPEN,

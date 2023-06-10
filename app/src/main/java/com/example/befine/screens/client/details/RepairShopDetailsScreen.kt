@@ -1,10 +1,12 @@
 package com.example.befine.screens.client.details
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -12,29 +14,36 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import coil.compose.rememberAsyncImagePainter
 import com.example.befine.R
 import com.example.befine.components.ui.RepairShopName
+import com.example.befine.firebase.Storage
+import com.example.befine.model.RepairShop
 import com.example.befine.ui.theme.BefineTheme
-import com.example.befine.utils.Screen
+import com.example.befine.utils.*
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun SubText(text: String) {
@@ -66,32 +75,76 @@ fun Schedule(day: String, time: String) {
 @Composable
 fun RepairShopDetailsScreen(
     scope: CoroutineScope = rememberCoroutineScope(),
-    scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState(),
+    db: FirebaseFirestore = Firebase.firestore,
+    storage: FirebaseStorage = Storage.getInstance().getStorage()
 ) {
-    val singapore = LatLng(1.35, 103.87)
+    var location by remember { mutableStateOf(LatLng(-6.187198, 106.827342)) }
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(singapore, 14f)
+        position = CameraPosition.fromLatLngZoom(location, 14f)
     }
+    var repairShop by remember {
+        mutableStateOf(RepairShop())
+    }
+    var imageUri by remember { mutableStateOf(Uri.EMPTY) }
+
+    LaunchedEffect(true) {
+        // Get repair shop data
+        repairShop =
+            db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2").get().await()
+                .toObject<RepairShop>() ?: RepairShop()
+
+        // Get repair shop image
+        val imageRef = storage.reference.child("images/${repairShop.photo}")
+        imageRef.downloadUrl.addOnSuccessListener { uri ->
+            imageUri = uri
+        }
+
+        // Update location
+        location = LatLng(repairShop.latitude?.toDouble()!!, repairShop.longitude?.toDouble()!!)
+        cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 14f)
+    }
+
+    val closedHourThisDay =
+        if (repairShop.schedule?.isNotEmpty() == true && repairShop.schedule!![getDay()].status == STATUS.OPEN) {
+            repairShop.schedule?.get(getDay())?.operationalHours.toString().slice(6..10)
+        } else {
+            ""
+        }
+    val thisDaySchedule =
+        if (repairShop.schedule?.let { isRepairShopOpen(it) } == STATUS.OPEN) "Open — Closed at $closedHourThisDay" else "Closed"
+
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 128.dp,
         sheetContent = {
             Column(
                 Modifier
-                    .padding(horizontal = Screen.paddingHorizontal)
+                    .padding(
+                        horizontal = Screen.paddingHorizontal,
+                        vertical = Screen.paddingVertical
+                    )
                     .height(550.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.default_image),
+                    painter = if (imageUri.path?.isNotEmpty() == true) rememberAsyncImagePainter(
+                        model = imageUri, placeholder = painterResource(
+                            id = R.drawable.default_image
+                        )
+                    ) else painterResource(id = R.drawable.default_image),
+                    modifier = Modifier.size(height = 200.dp, width = 250.dp),
+                    contentScale = ContentScale.Crop,
                     contentDescription = ""
                 )
                 RepairShopName(
-                    name = "Bengkel Amanah",
+                    name = repairShop.name.toString(),
                     fontSize = 20.sp,
                     modifier = Modifier.padding(vertical = 6.dp)
                 )
-                SubText(text = "Jl Merdeka No 14, Jakarta Selatan, Jakarta.")
-                SubText(text = "Buka - Tutup jam 17.00")
+                SubText(text = repairShop.description.toString())
+                SubText(text = repairShop.address.toString())
+                SubText(text = thisDaySchedule)
                 SubText(text = "1.1km - 5 mnt")
                 Divider(modifier = Modifier.padding(vertical = 10.dp))
                 Row() {
@@ -105,13 +158,14 @@ fun RepairShopDetailsScreen(
                             .weight(1f)
                             .padding(start = 16.dp)
                     ) {
-                        Schedule(day = "Senin", time = "07.00 - 15.00")
-                        Schedule(day = "Selasa", time = "07.00 - 15.00")
-                        Schedule(day = "Rabu", time = "07.00 - 15.00")
-                        Schedule(day = "Kamis", time = "07.00 - 15.00")
-                        Schedule(day = "Jum'at", time = "07.00 - 15.00")
-                        Schedule(day = "Sabtu", time = "07.00 - 15.00")
-                        Schedule(day = "Minggu", time = "07.00 - 15.00")
+                        repairShop.schedule?.forEach { data ->
+                            val time =
+                                if (data.operationalHours.isNullOrBlank()) "closed" else data.operationalHours.toString()
+                            Schedule(
+                                day = capitalize(data.day.toString()),
+                                time = time
+                            )
+                        }
                     }
                 }
                 Divider(modifier = Modifier.padding(vertical = 10.dp))
@@ -155,11 +209,13 @@ fun RepairShopDetailsScreen(
                 cameraPositionState = cameraPositionState,
                 onMapClick = { _ -> scope.launch { scaffoldState.bottomSheetState.partialExpand() } },
             ) {
-                Marker(
-                    state = MarkerState(position = singapore),
-                    title = "Singapore",
-                    snippet = "Marker in Singapore"
-                )
+                if (location.latitude != -6.187198 && location.longitude != 106.827342) {
+                    Marker(
+                        state = MarkerState(position = location),
+                        title = "Singapore",
+                        snippet = "Marker in Singapore"
+                    )
+                }
             }
         }
     }

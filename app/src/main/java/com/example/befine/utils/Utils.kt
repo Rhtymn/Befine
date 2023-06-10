@@ -23,6 +23,7 @@ val days =
         Day.SATURDAY,
         Day.SUNDAY
     )
+
 object ActiveTimePicker {
     val START_WEEKDAYS = "startWeekdays"
     val END_WEEKDAYS = "endWeekdays"
@@ -153,4 +154,13 @@ fun isRepairShopOpen(schedule: List<Schedule>): String {
             STATUS.CLOSED
         }
     }
+}
+
+fun getDay(): Int {
+    val calendar = Calendar.getInstance()
+    return if (calendar.get(Calendar.DAY_OF_WEEK) == 1) 6 else calendar.get(Calendar.DAY_OF_WEEK) - 2
+}
+
+fun capitalize(value: String): String {
+    return "${value[0].uppercaseChar()}${value.slice(1 until value.length)}"
 }

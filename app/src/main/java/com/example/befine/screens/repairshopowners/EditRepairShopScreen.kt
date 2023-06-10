@@ -42,25 +42,28 @@ import com.example.befine.utils.*
 import java.util.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.net.toUri
 import com.example.befine.components.authentication.FilledButton
 import com.example.befine.components.ui.TopBar
+import com.example.befine.firebase.Auth
 import com.example.befine.firebase.Storage
 import com.example.befine.model.RepairShop
 import com.example.befine.model.Schedule
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
-import kotlin.collections.List
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRepairShopScreen(
     navigateToProfileScreen: () -> Unit = {},
     db: FirebaseFirestore = Firebase.firestore,
-    storage: FirebaseStorage = Storage.getInstance().getStorage()
+    storage: FirebaseStorage = Storage.getInstance().getStorage(),
+    auth: FirebaseAuth = Auth.getInstance().getAuth()
 ) {
     // Context for this composable component
     val context = LocalContext.current
@@ -134,40 +137,23 @@ fun EditRepairShopScreen(
         mutableStateMapOf(*days.map { it to false }.toTypedArray())
     }
 
+    // State related to select image state
+    var isUserUploadFile by remember { mutableStateOf(false) }
+
     fun resetInputField() {
-        repairShopName = ""
         isRepairShopError = false
         repairShopErrorMsg = ""
 
-        address = ""
         isAddressError = false
         addressErrorMsg = ""
 
-        description = ""
         isDescriptionError = false
         descriptionErrorMsg = ""
 
-        phoneNumber = ""
         isPhoneNumberError = false
         phoneNumberErrorMsg = ""
 
-        capturedImageUri = Uri.EMPTY
-
-        latitude = 0.0
-        longitude = 0.0
-
-        startWeekdayHours = "00:00"
-        endWeekdaysHours = "00:00"
-        startWeekendHours = "00:00"
-        endWeekendHours = "00:00"
-
-        selectedDay[Day.MONDAY] = false
-        selectedDay[Day.TUESDAY] = false
-        selectedDay[Day.WEDNESDAY] = false
-        selectedDay[Day.THURSDAY] = false
-        selectedDay[Day.FRIDAY] = false
-        selectedDay[Day.SATURDAY] = false
-        selectedDay[Day.SUNDAY] = false
+        isUserUploadFile = false
     }
 
     // Launcher for taking image from camera by implicit intent
@@ -175,6 +161,7 @@ fun EditRepairShopScreen(
         contract = ActivityResultContracts.TakePicture()
     ) {
         capturedImageUri = uri
+        isUserUploadFile = true
     }
 
     // Launcher for taking image from gallery by implicit intent
@@ -182,6 +169,7 @@ fun EditRepairShopScreen(
         contract = ActivityResultContracts.GetContent()
     ) {
         capturedImageUri = uri
+        isUserUploadFile = true
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -206,10 +194,6 @@ fun EditRepairShopScreen(
         } else {
             Log.d("EDIT", "No data")
         }
-    }
-
-    fun updateHandler() {
-        Log.d("EDIT", "Update!")
     }
 
     fun onClickCameraButtonHandler() {
@@ -352,6 +336,7 @@ fun EditRepairShopScreen(
 
                     }
                 }
+                val photo = if (isUserUploadFile) "briWG2CqTAe7SVYEf3AYN2O42tq2.jpg" else "default.jpg"
 
                 val newRepairShopData = RepairShop(
                     name = repairShopName,
@@ -360,18 +345,38 @@ fun EditRepairShopScreen(
                     latitude = latitude.toString(),
                     longitude = longitude.toString(),
                     phone_number = phoneNumber,
-                    photo = "default.jpg",
+                    photo = photo,
                     schedule = newSchedules
                 )
 
-                // update process
-                db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2")
-                    .set(newRepairShopData).addOnSuccessListener {
-                        isLoading = false
-                        Toast.makeText(context, "Update success", Toast.LENGTH_SHORT).show()
-                    }.addOnFailureListener {
-                        Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
+                // upload file process
+                if (isUserUploadFile) {
+                    val storageRef = storage.reference
+                    val userRef =
+                        storageRef.child("images/briWG2CqTAe7SVYEf3AYN2O42tq2.${file.extension}")
+
+                    userRef.putFile(file.toUri()).addOnSuccessListener {
+                        // update process
+                        db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2")
+                            .set(newRepairShopData).addOnSuccessListener {
+                                isLoading = false
+                                Toast.makeText(context, "Update success", Toast.LENGTH_SHORT).show()
+                            }.addOnFailureListener {
+                                Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
+                                userRef.delete()
+                            }
                     }
+                } else {
+                    // update process
+                    db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2")
+                        .set(newRepairShopData).addOnSuccessListener {
+                            isLoading = false
+                            Toast.makeText(context, "Update success", Toast.LENGTH_SHORT).show()
+                        }.addOnFailureListener {
+                            Toast.makeText(context, "Update failed", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                isUserUploadFile = false
             }
         } catch (e: Exception) {
             Toast.makeText(context, "Something went wrong", Toast.LENGTH_SHORT).show()

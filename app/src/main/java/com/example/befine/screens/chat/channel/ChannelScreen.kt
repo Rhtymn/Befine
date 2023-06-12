@@ -9,6 +9,7 @@ import com.example.befine.components.ui.chat.ChatBox
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.Screen
 
+
 @Composable
 fun ChannelScreen(modifier: Modifier = Modifier) {
     Column(

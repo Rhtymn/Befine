@@ -147,7 +147,7 @@ fun RepairShopDetailsScreen(
                 SubText(text = thisDaySchedule)
                 SubText(text = "1.1km - 5 mnt")
                 Divider(modifier = Modifier.padding(vertical = 10.dp))
-                Row() {
+                Row {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_schedule_24),
                         contentDescription = "",
@@ -184,7 +184,7 @@ fun RepairShopDetailsScreen(
                 }
             }
         }) {
-        Box() {
+        Box {
             Column(
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -207,7 +207,7 @@ fun RepairShopDetailsScreen(
                 modifier = Modifier
                     .fillMaxSize(),
                 cameraPositionState = cameraPositionState,
-                onMapClick = { _ -> scope.launch { scaffoldState.bottomSheetState.partialExpand() } },
+                onMapClick = { scope.launch { scaffoldState.bottomSheetState.partialExpand() } },
             ) {
                 if (location.latitude != -6.187198 && location.longitude != 106.827342) {
                     Marker(
@@ -225,7 +225,7 @@ fun RepairShopDetailsScreen(
 @Preview
 @Composable
 fun RepairShopDetailsPreview() {
-    BefineTheme() {
+    BefineTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             RepairShopDetailsScreen()
         }

@@ -17,6 +17,8 @@ android {
         versionCode 1
         versionName "1.0"
 
+        manifestPlaceholders = [file_provider: "com.example.befine"]
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -91,6 +93,10 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
 
     implementation 'com.adevinta.android:leku:10.1.0'
+
+
+    implementation "androidx.core:core-splashscreen:1.0.0"
+
 
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 }

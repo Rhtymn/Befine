@@ -4,6 +4,8 @@ plugins {
 
     // Add the Google services Gradle plugin
     id 'com.google.gms.google-services'
+
+    id("com.google.devtools.ksp").version("1.6.10-1.0.4") // Or latest version of KSP
 }
 
 android {
@@ -98,6 +100,8 @@ dependencies {
 
     implementation "androidx.core:core-splashscreen:1.0.0"
 
+    implementation "com.squareup.moshi:moshi:1.14.0"
+    implementation "com.squareup.moshi:moshi-kotlin:1.14.0"
 
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 }

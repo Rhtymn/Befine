@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,12 +19,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.befine.firebase.Auth
+import com.example.befine.model.ChatRoomState
 import com.example.befine.navigation.Screen
-import com.example.befine.preferences.PreferenceDatastore.Companion.userId
 import com.example.befine.screens.LoginScreen
 import com.example.befine.screens.RepairShopSignUpScreen
 import com.example.befine.screens.SignUpScreen
 import com.example.befine.screens.chat.channel.ChannelScreen
+import com.example.befine.screens.chat.room.ChatRoom
 import com.example.befine.screens.client.HomeScreen
 import com.example.befine.screens.client.details.RepairShopDetailsScreen
 import com.example.befine.screens.profile.ProfileScreen
@@ -32,6 +34,8 @@ import com.example.befine.screens.repairshopowners.RepairShopHome
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.ROLE
 import com.google.firebase.auth.FirebaseAuth
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,14 +72,19 @@ fun BefineApp(
         navController.navigate(Screen.RegisterUser.route)
     }
 
-    val goToEditRepairShopScreen : (userId: String) -> Unit =
+    val goToEditRepairShopScreen: (userId: String) -> Unit =
         { userId -> navController.navigate(Screen.EditRepairShop.createRoute(userId)) }
-
     val goToRepairShopDetailScreen: (repairShopId: String) -> Unit =
         { repairShopId -> navController.navigate(Screen.Details.createRoute(repairShopId)) }
-
     val goToProfile: (role: String) -> Unit = { role ->
         navController.navigate(Screen.Profile.createRoute(role))
+    }
+    val goToChatRoom: (chatRoomState: ChatRoomState) -> Unit = { chatRoomState ->
+        val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+        val jsonAdapter = moshi.adapter(ChatRoomState::class.java).lenient()
+        val chatRoomStateJson = jsonAdapter.toJson(chatRoomState)
+
+        navController.navigate(Screen.ChatRoom.createRoute(chatRoomStateJson))
     }
 
     NavHost(
@@ -144,8 +153,20 @@ fun BefineApp(
             val repairShopId = it.arguments?.getString("repairShopId")
             RepairShopDetailsScreen(
                 repairShopId = repairShopId.toString(),
-                navigateToHomeScreen = goToRegularHomeScreen()
+                navigateToHomeScreen = goToRegularHomeScreen(),
+                navigateToChatRoom = goToChatRoom
             )
+        }
+        composable(
+            Screen.ChatRoom.route,
+            arguments = listOf(navArgument("receiver") { type = NavType.StringType })
+        ) {
+            val chatRoomStateJson = it.arguments?.getString("receiver")
+            val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+            val jsonAdapter = moshi.adapter(ChatRoomState::class.java).lenient()
+            val chatRoomState = jsonAdapter.fromJson(chatRoomStateJson!!)
+
+            ChatRoom(chatRoomState!!)
         }
     }
 

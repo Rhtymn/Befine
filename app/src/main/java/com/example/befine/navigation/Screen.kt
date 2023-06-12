@@ -13,6 +13,10 @@ sealed class Screen(val route: String) {
         fun createRoute(userId: String) = "editRepairShop/$userId"
     }
     object ChatChannel : Screen("chatChannel")
+
+    object ChatRoom: Screen("chatRoom/{receiver}") {
+        fun createRoute(receiver: String) = "chatRoom/$receiver"
+    }
     object Login : Screen("login")
     object RegisterUser : Screen("registerUser")
     object RegisterRepairShop : Screen("registerRepairShop")

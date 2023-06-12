@@ -26,13 +26,16 @@ import androidx.compose.ui.zIndex
 import coil.compose.rememberAsyncImagePainter
 import com.example.befine.R
 import com.example.befine.components.ui.RepairShopName
+import com.example.befine.firebase.Auth
 import com.example.befine.firebase.Storage
+import com.example.befine.model.ChatRoomState
 import com.example.befine.model.RepairShop
 import com.example.befine.preferences.PreferenceDatastore.Companion.userId
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -77,7 +80,9 @@ fun RepairShopDetailsScreen(
     db: FirebaseFirestore = Firebase.firestore,
     storage: FirebaseStorage = Storage.getInstance().getStorage(),
     repairShopId: String = "briWG2CqTAe7SVYEf3AYN2O42tq2",
-    navigateToHomeScreen: () -> Unit = {}
+    navigateToHomeScreen: () -> Unit = {},
+    navigateToChatRoom: (chatRoomState: ChatRoomState) -> Unit = {},
+    auth: FirebaseAuth = Auth.getInstance().getAuth()
 ) {
     var location by remember { mutableStateOf(LatLng(-6.187198, 106.827342)) }
     val cameraPositionState = rememberCameraPositionState {
@@ -170,7 +175,16 @@ fun RepairShopDetailsScreen(
                 }
                 Divider(modifier = Modifier.padding(vertical = 10.dp))
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        navigateToChatRoom(
+                            ChatRoomState(
+                                name = repairShop.name.toString(),
+                                photo = repairShop.photo.toString(),
+                                receiverId = repairShopId,
+                                senderId = auth.currentUser?.uid!!
+                            )
+                        )
+                    },
                     modifier = Modifier.padding(top = 6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
@@ -199,7 +213,8 @@ fun RepairShopDetailsScreen(
                     contentDescription = "",
                     tint = Color.White,
                     modifier = Modifier
-                        .size(35.dp).clickable { navigateToHomeScreen() }
+                        .size(35.dp)
+                        .clickable { navigateToHomeScreen() }
                 )
             }
 

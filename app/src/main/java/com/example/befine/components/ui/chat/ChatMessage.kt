@@ -17,9 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ChatMessage() {
+fun ChatMessage(modifier: Modifier = Modifier) {
     Column(
-        Modifier
+        modifier = modifier
             .widthIn(min = 50.dp, max = 280.dp)
             .clip(
                 RoundedCornerShape(8.dp)

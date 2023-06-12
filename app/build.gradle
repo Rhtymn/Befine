@@ -94,6 +94,7 @@ dependencies {
 
     implementation 'com.adevinta.android:leku:10.1.0'
 
+    implementation 'com.google.firebase:firebase-database-ktx'
 
     implementation "androidx.core:core-splashscreen:1.0.0"
 

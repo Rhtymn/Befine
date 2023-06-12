@@ -30,7 +30,7 @@ import kotlinx.coroutines.tasks.await
 fun ProfileScreen(
     role: String = ROLE.CLIENT,
     navigateToLogin: () -> Unit,
-    navigateToEditRepairShop: () -> Unit = {},
+    navigateToEditRepairShop: (userId: String) -> Unit = {},
     navigateToRegularUserHome: () -> Unit = {},
     navigateToRepairShopHome: () -> Unit = {},
     auth: FirebaseAuth = Auth.getInstance().getAuth(),
@@ -73,7 +73,7 @@ fun ProfileScreen(
             Divider(modifier = Modifier.padding(vertical = 16.dp))
             if (role == ROLE.REPAIR_SHOP_OWNER) {
                 ActionButton(
-                    onClick = navigateToEditRepairShop,
+                    onClick = { navigateToEditRepairShop(auth.currentUser?.uid!!) },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.Edit,

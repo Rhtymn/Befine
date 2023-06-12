@@ -2,6 +2,7 @@ package com.example.befine.components.ui
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -30,7 +31,8 @@ fun NearbyRepairShopItem(
     distance: String,
     status: String,
     image: String = "default.jpg",
-    storage: FirebaseStorage = Storage.getInstance().getStorage()
+    storage: FirebaseStorage = Storage.getInstance().getStorage(),
+    onClick: () -> Unit
 ) {
     var imageUrl by remember { mutableStateOf("") }
     val imageRef = storage.reference.child("images/$image")
@@ -44,9 +46,12 @@ fun NearbyRepairShopItem(
     Card(
         Modifier
             .width(150.dp)
-            .padding(end = 16.dp), shape = Shapes.small, colors = CardDefaults.cardColors(
+            .padding(end = 16.dp)
+            .clickable { onClick() },
+        shape = Shapes.small,
+        colors = CardDefaults.cardColors(
             containerColor = Color.White
-        )
+        ),
     ) {
         Column() {
             Box(
@@ -95,6 +100,6 @@ fun NearbyRepairShopItemPreview() {
         modifier = Modifier.fillMaxSize(),
         color = Color.White
     ) {
-        NearbyRepairShopItem(name = "Bengkel Amanah", distance = "0.7 km", status = STATUS.OPEN)
+        NearbyRepairShopItem(name = "Bengkel Amanah", distance = "0.7 km", status = STATUS.OPEN, onClick = {})
     }
 }

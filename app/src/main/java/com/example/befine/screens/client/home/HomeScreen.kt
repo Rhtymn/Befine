@@ -103,6 +103,7 @@ fun GetUserLocation() {
 fun HomeScreen(
     navigateToProfile: () -> Unit,
     navigateToChatChannel: () -> Unit,
+    navigateToRepairShopDetail: (repairShopId: String) -> Unit,
     homeViewModel: HomeViewModel = viewModel(factory = ViewModelFactory(Injection.provideRepairShopRepository())),
 ) {
     val data = homeViewModel.getAllRepairShop()
@@ -158,9 +159,9 @@ fun HomeScreen(
         ) {
             GetUserLocation()
             HeaderText(value = "Nearby Repair Shops")
-            NearbyShopList(data = data)
+            NearbyShopList(data = data, navigateToRepairShopDetail = navigateToRepairShopDetail)
             HeaderText(value = "Others")
-            OthersList(data = data)
+            OthersList(data = data, navigateToRepairShopDetail = navigateToRepairShopDetail)
         }
     }
 }
@@ -176,28 +177,36 @@ fun HeaderText(value: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun NearbyShopList(data: List<RepairShopWithId>) {
+fun NearbyShopList(
+    data: List<RepairShopWithId>,
+    navigateToRepairShopDetail: (repairShopId: String) -> Unit
+) {
     LazyRow(modifier = Modifier.padding(bottom = 24.dp)) {
         items(data, key = { it.id }) {
             NearbyRepairShopItem(
                 name = it.repairShop.name.toString(),
                 distance = "0.7 km",
                 status = isRepairShopOpen(it.repairShop.schedule!!),
-                image = it.repairShop.photo.toString()
+                image = it.repairShop.photo.toString(),
+                onClick = { navigateToRepairShopDetail(it.id) }
             )
         }
     }
 }
 
 @Composable
-fun OthersList(data: List<RepairShopWithId>) {
+fun OthersList(
+    data: List<RepairShopWithId>,
+    navigateToRepairShopDetail: (repairShopId: String) -> Unit
+) {
     LazyColumn() {
         items(data, key = { it.id }) {
             RepairShopItem(
                 name = it.repairShop.name.toString(),
                 status = isRepairShopOpen(it.repairShop.schedule!!),
                 address = it.repairShop.address.toString(),
-                image = it.repairShop.photo.toString()
+                image = it.repairShop.photo.toString(),
+                onClick = { navigateToRepairShopDetail(it.id) }
             )
         }
     }
@@ -210,7 +219,11 @@ fun HomeScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize(),
         ) {
-            HomeScreen(navigateToProfile = { /*TODO*/ }, navigateToChatChannel = { /*TODO*/ })
+            HomeScreen(
+                navigateToProfile = { /*TODO*/ },
+                navigateToChatChannel = { /*TODO*/ },
+                navigateToRepairShopDetail = {}
+            )
         }
     }
 }

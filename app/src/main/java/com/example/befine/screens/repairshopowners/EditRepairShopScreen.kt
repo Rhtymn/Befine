@@ -63,7 +63,8 @@ fun EditRepairShopScreen(
     navigateToProfileScreen: () -> Unit = {},
     db: FirebaseFirestore = Firebase.firestore,
     storage: FirebaseStorage = Storage.getInstance().getStorage(),
-    auth: FirebaseAuth = Auth.getInstance().getAuth()
+    auth: FirebaseAuth = Auth.getInstance().getAuth(),
+    userId: String = "briWG2CqTAe7SVYEf3AYN2O42tq2"
 ) {
     // Context for this composable component
     val context = LocalContext.current
@@ -233,7 +234,7 @@ fun EditRepairShopScreen(
 
     LaunchedEffect(true) {
         val repairShop: RepairShop =
-            db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2")
+            db.collection("repairShops").document(userId)
                 .get().await().toObject<RepairShop>() ?: RepairShop()
 
         repairShopName = if (repairShop.name.isNullOrBlank()) "" else repairShop.name.toString()
@@ -346,7 +347,7 @@ fun EditRepairShopScreen(
                     }
                 }
                 val photo =
-                    if (isUserUploadFile) "briWG2CqTAe7SVYEf3AYN2O42tq2.jpg" else "default.jpg"
+                    if (isUserUploadFile) "$userId.jpg" else "default.jpg"
 
                 val newRepairShopData = RepairShop(
                     name = repairShopName,
@@ -363,11 +364,11 @@ fun EditRepairShopScreen(
                 if (isUserUploadFile) {
                     val storageRef = storage.reference
                     val userRef =
-                        storageRef.child("images/briWG2CqTAe7SVYEf3AYN2O42tq2.${file.extension}")
+                        storageRef.child("images/$userId.${file.extension}")
 
                     userRef.putFile(file.toUri()).addOnSuccessListener {
                         // update process
-                        db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2")
+                        db.collection("repairShops").document(userId)
                             .set(newRepairShopData).addOnSuccessListener {
                                 isLoading = false
                                 Toast.makeText(context, "Update success", Toast.LENGTH_SHORT).show()
@@ -378,7 +379,7 @@ fun EditRepairShopScreen(
                     }
                 } else {
                     // update process
-                    db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2")
+                    db.collection("repairShops").document(userId)
                         .set(newRepairShopData).addOnSuccessListener {
                             isLoading = false
                             Toast.makeText(context, "Update success", Toast.LENGTH_SHORT).show()

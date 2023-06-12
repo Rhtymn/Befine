@@ -1,12 +1,9 @@
 package com.example.befine.screens.client.details
 
 import android.net.Uri
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -31,6 +28,7 @@ import com.example.befine.R
 import com.example.befine.components.ui.RepairShopName
 import com.example.befine.firebase.Storage
 import com.example.befine.model.RepairShop
+import com.example.befine.preferences.PreferenceDatastore.Companion.userId
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
 import com.google.android.gms.maps.model.CameraPosition
@@ -77,7 +75,9 @@ fun RepairShopDetailsScreen(
     scope: CoroutineScope = rememberCoroutineScope(),
     scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState(),
     db: FirebaseFirestore = Firebase.firestore,
-    storage: FirebaseStorage = Storage.getInstance().getStorage()
+    storage: FirebaseStorage = Storage.getInstance().getStorage(),
+    repairShopId: String = "briWG2CqTAe7SVYEf3AYN2O42tq2",
+    navigateToHomeScreen: () -> Unit = {}
 ) {
     var location by remember { mutableStateOf(LatLng(-6.187198, 106.827342)) }
     val cameraPositionState = rememberCameraPositionState {
@@ -91,7 +91,7 @@ fun RepairShopDetailsScreen(
     LaunchedEffect(true) {
         // Get repair shop data
         repairShop =
-            db.collection("repairShops").document("briWG2CqTAe7SVYEf3AYN2O42tq2").get().await()
+            db.collection("repairShops").document(repairShopId).get().await()
                 .toObject<RepairShop>() ?: RepairShop()
 
         // Get repair shop image
@@ -199,7 +199,7 @@ fun RepairShopDetailsScreen(
                     contentDescription = "",
                     tint = Color.White,
                     modifier = Modifier
-                        .size(35.dp)
+                        .size(35.dp).clickable { navigateToHomeScreen() }
                 )
             }
 

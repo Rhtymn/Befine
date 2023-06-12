@@ -1,6 +1,7 @@
 package com.example.befine.components.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
@@ -28,7 +29,8 @@ fun RepairShopItem(
     status: String,
     address: String,
     image: String = "default.jpg",
-    storage: FirebaseStorage = Storage.getInstance().getStorage()
+    storage: FirebaseStorage = Storage.getInstance().getStorage(),
+    onClick: () -> Unit
 ) {
     var imageUrl by remember { mutableStateOf("") }
     val imageRef = storage.reference.child("images/$image")
@@ -42,7 +44,8 @@ fun RepairShopItem(
     Card(
         Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp), shape = Shapes.small,
+            .padding(bottom = 16.dp).clickable { onClick() },
+        shape = Shapes.small,
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )
@@ -98,7 +101,8 @@ fun RepairShopItemPreview() {
         RepairShopItem(
             name = "Bengkel Amanah",
             status = STATUS.OPEN,
-            address = "Jl Merdeka No 14, Jakarta Selatan, Jakarta."
+            address = "Jl Merdeka No 14, Jakarta Selatan, Jakarta.",
+            onClick = {}
         )
     }
 }

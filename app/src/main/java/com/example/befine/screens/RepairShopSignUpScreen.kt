@@ -126,7 +126,7 @@ fun RepairShopSignUpScreen(
                             if (auth.currentUser != null) {
                                 val user = UserData(
                                     name = repairShopName,
-                                    role = REPAIR_SHOP_OWNER.name
+                                    role = ROLE.REPAIR_SHOP_OWNER
                                 )
                                 var schedules = mutableListOf<Schedule>()
                                 days.forEach {

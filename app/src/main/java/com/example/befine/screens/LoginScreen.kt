@@ -106,14 +106,14 @@ fun LoginScreen(
 
                             db.collection("users").document(auth.currentUser!!.uid).get()
                                 .addOnSuccessListener {
-                                    if (it.get("role") == "REGULAR_USER") {
+                                    if (it.get("role") == ROLE.CLIENT) {
                                         navigateToRegularHome()
-                                    } else if (it.get("role") == "REPAIR_SHOP_OWNER") {
+                                    } else if (it.get("role") == ROLE.REPAIR_SHOP_OWNER) {
                                         navigateToRepairShopHome()
                                     } else {
                                         Toast.makeText(
                                             context,
-                                            "Repair Shop Home Screen under development",
+                                            "Something went wrong, try again later",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }

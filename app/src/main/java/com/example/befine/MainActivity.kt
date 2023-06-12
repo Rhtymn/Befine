@@ -1,6 +1,7 @@
 package com.example.befine
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +17,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.befine.firebase.Auth
 import com.example.befine.navigation.Screen
+import com.example.befine.preferences.PreferenceDatastore.Companion.userId
 import com.example.befine.screens.LoginScreen
 import com.example.befine.screens.RepairShopSignUpScreen
 import com.example.befine.screens.SignUpScreen
@@ -28,6 +31,7 @@ import com.example.befine.screens.repairshopowners.EditRepairShopScreen
 import com.example.befine.screens.repairshopowners.RepairShopHome
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.ROLE
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +53,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun BefineApp(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    auth: FirebaseAuth = Auth.getInstance().getAuth()
 ) {
     fun goToLogin(): () -> Unit = {
         navController.navigate(Screen.Login.route) {
@@ -63,7 +68,12 @@ fun BefineApp(
         navController.navigate(Screen.RegisterUser.route)
     }
 
-    fun goToEditRepairShopScreen() = { -> navController.navigate(Screen.EditRepairShop.route) }
+    val goToEditRepairShopScreen : (userId: String) -> Unit =
+        { userId -> navController.navigate(Screen.EditRepairShop.createRoute(userId)) }
+
+    val goToRepairShopDetailScreen: (repairShopId: String) -> Unit =
+        { repairShopId -> navController.navigate(Screen.Details.createRoute(repairShopId)) }
+
     val goToProfile: (role: String) -> Unit = { role ->
         navController.navigate(Screen.Profile.createRoute(role))
     }
@@ -94,7 +104,8 @@ fun BefineApp(
         composable(Screen.Home.route) {
             HomeScreen(
                 navigateToProfile = { goToProfile(ROLE.CLIENT) },
-                navigateToChatChannel = { navController.navigate(Screen.ChatChannel.route) }
+                navigateToChatChannel = { navController.navigate(Screen.ChatChannel.route) },
+                navigateToRepairShopDetail = goToRepairShopDetailScreen
             )
         }
         composable(
@@ -105,7 +116,7 @@ fun BefineApp(
             ProfileScreen(
                 navigateToLogin = goToLogin(),
                 role = role.toString(),
-                navigateToEditRepairShop = goToEditRepairShopScreen(),
+                navigateToEditRepairShop = goToEditRepairShopScreen,
                 navigateToRegularUserHome = goToRegularHomeScreen(),
                 navigateToRepairShopHome = goToRepairShopHome()
             )
@@ -116,11 +127,25 @@ fun BefineApp(
         composable(Screen.RepairShopHome.route) {
             RepairShopHome(navigateToProfile = { goToProfile(ROLE.REPAIR_SHOP_OWNER) })
         }
-        composable(Screen.EditRepairShop.route) {
-            EditRepairShopScreen(navigateToProfileScreen = { goToProfile(ROLE.REPAIR_SHOP_OWNER) })
+        composable(
+            Screen.EditRepairShop.route,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) {
+            val userId = it.arguments?.getString("userId")
+            EditRepairShopScreen(
+                navigateToProfileScreen = { goToProfile(ROLE.REPAIR_SHOP_OWNER) },
+                userId = userId.toString()
+            )
         }
-        composable(Screen.Details.route) {
-            RepairShopDetailsScreen()
+        composable(
+            Screen.Details.route,
+            arguments = listOf(navArgument("repairShopId") { type = NavType.StringType })
+        ) {
+            val repairShopId = it.arguments?.getString("repairShopId")
+            RepairShopDetailsScreen(
+                repairShopId = repairShopId.toString(),
+                navigateToHomeScreen = goToRegularHomeScreen()
+            )
         }
     }
 

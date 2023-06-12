@@ -6,8 +6,12 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile/{role}") {
         fun createRoute(role: String) = "profile/$role"
     }
-    object Details : Screen("details")
-    object EditRepairShop: Screen("editRepairShop")
+    object Details : Screen("details/{repairShopId}") {
+        fun createRoute(repairShopId: String) = "details/$repairShopId"
+    }
+    object EditRepairShop: Screen("editRepairShop/{userId}") {
+        fun createRoute(userId: String) = "editRepairShop/$userId"
+    }
     object ChatChannel : Screen("chatChannel")
     object Login : Screen("login")
     object RegisterUser : Screen("registerUser")

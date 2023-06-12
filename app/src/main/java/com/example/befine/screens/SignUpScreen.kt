@@ -121,7 +121,7 @@ fun SignUpScreen(
                             if (auth.currentUser != null) {
                                 val user = UserData(
                                     name = fullName,
-                                    role = REGULAR_USER.name
+                                    role = ROLE.CLIENT
                                 )
 
                                 // Create users in firestore database

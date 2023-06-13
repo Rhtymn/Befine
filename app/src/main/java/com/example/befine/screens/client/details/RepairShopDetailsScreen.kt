@@ -23,6 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.befine.R
 import com.example.befine.components.ui.RepairShopName
@@ -80,9 +83,9 @@ fun RepairShopDetailsScreen(
     db: FirebaseFirestore = Firebase.firestore,
     storage: FirebaseStorage = Storage.getInstance().getStorage(),
     repairShopId: String = "briWG2CqTAe7SVYEf3AYN2O42tq2",
-    navigateToHomeScreen: () -> Unit = {},
     navigateToChatRoom: (chatRoomState: ChatRoomState) -> Unit = {},
-    auth: FirebaseAuth = Auth.getInstance().getAuth()
+    auth: FirebaseAuth = Auth.getInstance().getAuth(),
+    navController: NavHostController
 ) {
     var location by remember { mutableStateOf(LatLng(-6.187198, 106.827342)) }
     val cameraPositionState = rememberCameraPositionState {
@@ -214,7 +217,7 @@ fun RepairShopDetailsScreen(
                     tint = Color.White,
                     modifier = Modifier
                         .size(35.dp)
-                        .clickable { navigateToHomeScreen() }
+                        .clickable { navController.popBackStack() }
                 )
             }
 
@@ -242,7 +245,7 @@ fun RepairShopDetailsScreen(
 fun RepairShopDetailsPreview() {
     BefineTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            RepairShopDetailsScreen()
+            RepairShopDetailsScreen(navController = rememberNavController())
         }
     }
 }

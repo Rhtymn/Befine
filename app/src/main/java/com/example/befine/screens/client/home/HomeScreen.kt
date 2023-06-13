@@ -9,6 +9,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -32,9 +33,11 @@ import com.example.befine.components.ui.NearbyRepairShopItem
 import com.example.befine.components.ui.RepairShopItem
 import com.example.befine.components.ui.UserLocation
 import com.example.befine.di.Injection
+import com.example.befine.model.RepairShop
 import com.example.befine.model.RepairShopWithId
 import com.example.befine.screens.client.home.HomeViewModel
 import com.example.befine.ui.theme.BefineTheme
+import com.example.befine.utils.STATUS
 import com.example.befine.utils.Screen
 import com.example.befine.utils.ViewModelFactory
 import com.example.befine.utils.isRepairShopOpen
@@ -106,64 +109,77 @@ fun HomeScreen(
     navigateToRepairShopDetail: (repairShopId: String) -> Unit,
     homeViewModel: HomeViewModel = viewModel(factory = ViewModelFactory(Injection.provideRepairShopRepository())),
 ) {
-    val data = homeViewModel.getAllRepairShop()
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                title = {
-                    SearchBar(
-                        query = "",
-                        onQueryChange = {},
-                        onSearch = {},
-                        active = false,
-                        onActiveChange = {},
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Filled.Search, contentDescription = "")
-                        },
-                        placeholder = { Text("Search") }
-                    ) {
+    var data by remember { mutableStateOf(listOf<RepairShopWithId>()) }
 
-                    }
-                },
-                windowInsets = WindowInsets(bottom = 8.dp),
-                navigationIcon = {
-                    IconButton(onClick = { navigateToProfile() }) {
-                        Icon(
-                            imageVector = Icons.Outlined.AccountCircle,
-                            contentDescription = "",
-                            tint = Color.Black
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { navigateToChatChannel() }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Email, contentDescription = "",
-                            tint = Color.Black
-                        )
-                    }
-                }
-            )
+    LaunchedEffect(true) {
+        data = homeViewModel.getAllRepairShop()
+    }
+
+    if (data.isEmpty()) {
+        Box(Modifier.fillMaxSize()) {
+            CircularProgressIndicator()
         }
-    ) { innerPadding ->
-        Column(
-            Modifier
-                .padding(innerPadding)
-                .padding(
-                    horizontal = Screen.paddingHorizontal,
-                    vertical = Screen.paddingVertical
+    } else {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    title = {
+                        SearchBar(
+                            query = "",
+                            onQueryChange = {},
+                            onSearch = {},
+                            active = false,
+                            onActiveChange = {},
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Filled.Search, contentDescription = "")
+                            },
+                            placeholder = { Text("Search") }
+                        ) {
+
+                        }
+                    },
+                    windowInsets = WindowInsets(bottom = 8.dp),
+                    navigationIcon = {
+                        IconButton(onClick = { navigateToProfile() }) {
+                            Icon(
+                                imageVector = Icons.Outlined.AccountCircle,
+                                contentDescription = "",
+                                tint = Color.Black
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { navigateToChatChannel() }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Email, contentDescription = "",
+                                tint = Color.Black
+                            )
+                        }
+                    }
                 )
-        ) {
-            GetUserLocation()
-            HeaderText(value = "Nearby Repair Shops")
-            NearbyShopList(data = data, navigateToRepairShopDetail = navigateToRepairShopDetail)
-            HeaderText(value = "Others")
-            OthersList(data = data, navigateToRepairShopDetail = navigateToRepairShopDetail)
+            }
+        ) { innerPadding ->
+            Column(
+                Modifier
+                    .padding(innerPadding)
+                    .padding(
+                        horizontal = Screen.paddingHorizontal,
+                        vertical = Screen.paddingVertical
+                    )
+            ) {
+                GetUserLocation()
+                HeaderText(value = "Nearby Repair Shops")
+                NearbyShopList(data = data, navigateToRepairShopDetail = navigateToRepairShopDetail)
+                HeaderText(value = "Others")
+                OthersList(data = data, navigateToRepairShopDetail = navigateToRepairShopDetail)
+            }
         }
     }
+
+
 }
 
 @Composable

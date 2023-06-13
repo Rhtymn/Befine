@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.befine.screens.chat.channel.ChannelScreen
+import com.example.befine.screens.chat.channel.ChatList
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.Screen
 
@@ -56,10 +57,10 @@ fun RepairShopHome(
             )
         }
     ) { innerPadding ->
-        ChannelScreen(
-            modifier = Modifier
+        ChatList(
+            Modifier
                 .padding(innerPadding)
-                .padding(horizontal = Screen.paddingHorizontal)
+                .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical)
         )
     }
 }

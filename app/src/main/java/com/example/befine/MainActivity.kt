@@ -58,7 +58,6 @@ class MainActivity : ComponentActivity() {
 fun BefineApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
-    auth: FirebaseAuth = Auth.getInstance().getAuth()
 ) {
     fun goToLogin(): () -> Unit = {
         navController.navigate(Screen.Login.route) {
@@ -125,13 +124,12 @@ fun BefineApp(
             ProfileScreen(
                 navigateToLogin = goToLogin(),
                 role = role.toString(),
+                navController = navController,
                 navigateToEditRepairShop = goToEditRepairShopScreen,
-                navigateToRegularUserHome = goToRegularHomeScreen(),
-                navigateToRepairShopHome = goToRepairShopHome()
             )
         }
         composable(Screen.ChatChannel.route) {
-            ChannelScreen()
+            ChannelScreen(navController = navController)
         }
         composable(Screen.RepairShopHome.route) {
             RepairShopHome(navigateToProfile = { goToProfile(ROLE.REPAIR_SHOP_OWNER) })
@@ -142,8 +140,8 @@ fun BefineApp(
         ) {
             val userId = it.arguments?.getString("userId")
             EditRepairShopScreen(
-                navigateToProfileScreen = { goToProfile(ROLE.REPAIR_SHOP_OWNER) },
-                userId = userId.toString()
+                userId = userId.toString(),
+                navController = navController
             )
         }
         composable(
@@ -153,7 +151,7 @@ fun BefineApp(
             val repairShopId = it.arguments?.getString("repairShopId")
             RepairShopDetailsScreen(
                 repairShopId = repairShopId.toString(),
-                navigateToHomeScreen = goToRegularHomeScreen(),
+                navController = navController,
                 navigateToChatRoom = goToChatRoom
             )
         }
@@ -166,7 +164,7 @@ fun BefineApp(
             val jsonAdapter = moshi.adapter(ChatRoomState::class.java).lenient()
             val chatRoomState = jsonAdapter.fromJson(chatRoomStateJson!!)
 
-            ChatRoom(chatRoomState!!)
+            ChatRoom(chatRoomState!!, navController = navController)
         }
     }
 

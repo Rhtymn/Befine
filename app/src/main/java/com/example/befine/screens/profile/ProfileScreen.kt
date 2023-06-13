@@ -9,6 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.befine.R
 import com.example.befine.components.ui.TopBar
 import com.example.befine.components.ui.profile.ActionButton
@@ -31,8 +34,7 @@ fun ProfileScreen(
     role: String = ROLE.CLIENT,
     navigateToLogin: () -> Unit,
     navigateToEditRepairShop: (userId: String) -> Unit = {},
-    navigateToRegularUserHome: () -> Unit = {},
-    navigateToRepairShopHome: () -> Unit = {},
+    navController: NavHostController,
     auth: FirebaseAuth = Auth.getInstance().getAuth(),
     db: FirebaseFirestore = Firebase.firestore
 ) {
@@ -54,11 +56,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopBar(title = "Profile") {
-                if (role == ROLE.CLIENT) {
-                    navigateToRegularUserHome()
-                } else if (role == ROLE.REPAIR_SHOP_OWNER) {
-                    navigateToRepairShopHome()
-                }
+                navController.popBackStack()
             }
         }
     ) { innerPadding ->
@@ -103,6 +101,7 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenPreview() {
     BefineTheme {
-        ProfileScreen(navigateToLogin = { /*TODO*/ })
+        ProfileScreen(navigateToLogin = { /*TODO*/ }, navController = rememberNavController(
+        ))
     }
 }

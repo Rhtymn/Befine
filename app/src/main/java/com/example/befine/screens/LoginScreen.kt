@@ -136,7 +136,6 @@ fun LoginScreen(
                         }
                         isLoading = false
                     }
-
             }
         } catch (e: Exception) {
             Log.d("LOGIN", e.message.toString())

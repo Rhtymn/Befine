@@ -134,6 +134,9 @@ fun isRepairShopOpen(schedule: List<Schedule>): String {
     val minute = calendar.get(Calendar.MINUTE)
 
     val scheduleOnThisDay = schedule[if (day == 1) 6 else day - 2]
+    if (scheduleOnThisDay.operationalHours == null) {
+        return STATUS.CLOSED
+    }
     val openHour = scheduleOnThisDay.operationalHours.toString().slice(0..1).toInt()
     val openMinute = scheduleOnThisDay.operationalHours.toString().slice(3..4).toInt()
     val closeHour = scheduleOnThisDay.operationalHours.toString().slice(6..7).toInt()

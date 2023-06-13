@@ -43,6 +43,9 @@ import java.util.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.net.toUri
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.befine.components.authentication.FilledButton
 import com.example.befine.components.ui.TopBar
 import com.example.befine.firebase.Auth
@@ -60,11 +63,11 @@ import kotlinx.coroutines.tasks.await
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRepairShopScreen(
-    navigateToProfileScreen: () -> Unit = {},
     db: FirebaseFirestore = Firebase.firestore,
     storage: FirebaseStorage = Storage.getInstance().getStorage(),
     auth: FirebaseAuth = Auth.getInstance().getAuth(),
-    userId: String = "briWG2CqTAe7SVYEf3AYN2O42tq2"
+    userId: String = "briWG2CqTAe7SVYEf3AYN2O42tq2",
+    navController: NavHostController
 ) {
     // Context for this composable component
     val context = LocalContext.current
@@ -397,7 +400,7 @@ fun EditRepairShopScreen(
     Scaffold(
         topBar = {
             TopBar(title = "Edit Repair Shop") {
-                navigateToProfileScreen()
+                navController.popBackStack()
             }
         }
     ) { innerPadding ->
@@ -592,7 +595,7 @@ fun EditRepairShopScreen(
 fun EditRepairShopScreenPreview() {
     BefineTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            EditRepairShopScreen()
+            EditRepairShopScreen(navController = rememberNavController())
         }
     }
 }

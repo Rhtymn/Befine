@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,9 +17,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.befine.model.ChatRoomState
 import com.example.befine.navigation.Screen
-import com.example.befine.screens.LoginScreen
-import com.example.befine.screens.RepairShopSignUpScreen
-import com.example.befine.screens.SignUpScreen
+import com.example.befine.screens.login.LoginScreen
+import com.example.befine.screens.register.repairshop.RepairShopSignUpScreen
+import com.example.befine.screens.register.regular.SignUpScreen
 import com.example.befine.screens.chat.channel.ChannelScreen
 import com.example.befine.screens.chat.room.ChatRoom
 import com.example.befine.screens.client.home.HomeScreen
@@ -52,7 +51,6 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BefineApp(
-    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
 ) {
     fun goToLogin(): () -> Unit = {
@@ -61,9 +59,9 @@ fun BefineApp(
         }
     }
 
-    fun goToRegularHomeScreen() = { -> navController.navigate(Screen.Home.route) }
-    fun goToRepairShopHome() = { -> navController.navigate(Screen.RepairShopHome.route) }
-    fun goToRegisterUser() = { ->
+    fun goToRegularHomeScreen(): () -> Unit = { navController.navigate(Screen.Home.route) }
+    fun goToRepairShopHome(): () -> Unit = { navController.navigate(Screen.RepairShopHome.route) }
+    fun goToRegisterUser(): () -> Unit = {
         navController.navigate(Screen.RegisterUser.route)
     }
 
@@ -165,11 +163,6 @@ fun BefineApp(
     }
 
 
-}
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
 }
 
 @Preview(showBackground = true)

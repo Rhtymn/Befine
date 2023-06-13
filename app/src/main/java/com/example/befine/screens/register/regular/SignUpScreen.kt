@@ -23,6 +23,7 @@ import com.example.befine.components.authentication.Header
 import com.example.befine.components.authentication.InputField
 import com.example.befine.components.authentication.Link
 import com.example.befine.components.ui.FormErrorText
+import com.example.befine.components.ui.Logo
 import com.example.befine.di.Injection
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
@@ -60,6 +61,7 @@ fun SignUpScreen(
             .fillMaxHeight(),
         verticalArrangement = Arrangement.Center
     ) {
+        Logo()
         Header(text = "Sign Up")
         InputField(
             value = state.email,

@@ -1,7 +1,6 @@
 package com.example.befine
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,14 +10,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.befine.firebase.Auth
 import com.example.befine.model.ChatRoomState
 import com.example.befine.navigation.Screen
 import com.example.befine.screens.LoginScreen
@@ -26,14 +23,13 @@ import com.example.befine.screens.RepairShopSignUpScreen
 import com.example.befine.screens.SignUpScreen
 import com.example.befine.screens.chat.channel.ChannelScreen
 import com.example.befine.screens.chat.room.ChatRoom
-import com.example.befine.screens.client.HomeScreen
+import com.example.befine.screens.client.home.HomeScreen
 import com.example.befine.screens.client.details.RepairShopDetailsScreen
 import com.example.befine.screens.profile.ProfileScreen
 import com.example.befine.screens.repairshopowners.EditRepairShopScreen
 import com.example.befine.screens.repairshopowners.RepairShopHome
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.ROLE
-import com.google.firebase.auth.FirebaseAuth
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 

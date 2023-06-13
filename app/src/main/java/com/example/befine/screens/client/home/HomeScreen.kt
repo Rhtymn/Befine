@@ -1,4 +1,4 @@
-package com.example.befine.screens.client
+package com.example.befine.screens.client.home
 
 import android.Manifest
 import android.app.Activity
@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -33,11 +34,8 @@ import com.example.befine.components.ui.NearbyRepairShopItem
 import com.example.befine.components.ui.RepairShopItem
 import com.example.befine.components.ui.UserLocation
 import com.example.befine.di.Injection
-import com.example.befine.model.RepairShop
 import com.example.befine.model.RepairShopWithId
-import com.example.befine.screens.client.home.HomeViewModel
 import com.example.befine.ui.theme.BefineTheme
-import com.example.befine.utils.STATUS
 import com.example.befine.utils.Screen
 import com.example.befine.utils.ViewModelFactory
 import com.example.befine.utils.isRepairShopOpen
@@ -51,7 +49,7 @@ fun GetUserLocation() {
     val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
     val isLocationEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     var location by remember { mutableStateOf<Location?>(null) }
-    val Geocoder = Geocoder(context)
+    val geocoder = Geocoder(context)
 
     DisposableEffect(Unit) {
         val locationListener = object : LocationListener {
@@ -59,7 +57,12 @@ fun GetUserLocation() {
                 location = newLocation
             }
 
-            @Deprecated("Deprecated in Java")
+            @Suppress("DEPRECATION")
+            @Deprecated("Deprecated in Java", ReplaceWith(
+                "super.onStatusChanged(provider, status, extras)",
+                "android.location.LocationListener"
+            )
+            )
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
                 super.onStatusChanged(provider, status, extras)
             }
@@ -74,7 +77,7 @@ fun GetUserLocation() {
                 locationListener
             )
         } else {
-            // Requset location permission
+            // Request location permission
             ActivityCompat.requestPermissions(
                 context as Activity,
                 arrayOf(locationPermission),
@@ -88,7 +91,7 @@ fun GetUserLocation() {
     }
 
     if (location != null) {
-        val address = Geocoder.getFromLocation(location!!.latitude, location!!.longitude, 1)
+        @Suppress("DEPRECATION") val address = geocoder.getFromLocation(location!!.latitude, location!!.longitude, 1)
         UserLocation(
             location = "${address?.get(0)?.thoroughfare}, ${address?.get(0)?.locality}",
             modifier = Modifier.padding(bottom = 8.dp)
@@ -109,77 +112,72 @@ fun HomeScreen(
     navigateToRepairShopDetail: (repairShopId: String) -> Unit,
     homeViewModel: HomeViewModel = viewModel(factory = ViewModelFactory(Injection.provideRepairShopRepository())),
 ) {
-    var data by remember { mutableStateOf(listOf<RepairShopWithId>()) }
+    val repairShopData: List<RepairShopWithId> by homeViewModel.repairShopData.observeAsState(
+        listOf()
+    )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ),
+                title = {
+                    SearchBar(
+                        query = "",
+                        onQueryChange = {},
+                        onSearch = {},
+                        active = false,
+                        onActiveChange = {},
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Filled.Search, contentDescription = "")
+                        },
+                        placeholder = { Text("Search") }
+                    ) {
 
-    LaunchedEffect(true) {
-        data = homeViewModel.getAllRepairShop()
-    }
-
-    if (data.isEmpty()) {
-        Box(Modifier.fillMaxSize()) {
-            CircularProgressIndicator()
-        }
-    } else {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
-                    title = {
-                        SearchBar(
-                            query = "",
-                            onQueryChange = {},
-                            onSearch = {},
-                            active = false,
-                            onActiveChange = {},
-                            leadingIcon = {
-                                Icon(imageVector = Icons.Filled.Search, contentDescription = "")
-                            },
-                            placeholder = { Text("Search") }
-                        ) {
-
-                        }
-                    },
-                    windowInsets = WindowInsets(bottom = 8.dp),
-                    navigationIcon = {
-                        IconButton(onClick = { navigateToProfile() }) {
-                            Icon(
-                                imageVector = Icons.Outlined.AccountCircle,
-                                contentDescription = "",
-                                tint = Color.Black
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { navigateToChatChannel() }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Email, contentDescription = "",
-                                tint = Color.Black
-                            )
-                        }
                     }
+                },
+                windowInsets = WindowInsets(bottom = 8.dp),
+                navigationIcon = {
+                    IconButton(onClick = { navigateToProfile() }) {
+                        Icon(
+                            imageVector = Icons.Outlined.AccountCircle,
+                            contentDescription = "",
+                            tint = Color.Black
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { navigateToChatChannel() }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Email, contentDescription = "",
+                            tint = Color.Black
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            Modifier
+                .padding(innerPadding)
+                .padding(
+                    horizontal = Screen.paddingHorizontal,
+                    vertical = Screen.paddingVertical
                 )
-            }
-        ) { innerPadding ->
-            Column(
-                Modifier
-                    .padding(innerPadding)
-                    .padding(
-                        horizontal = Screen.paddingHorizontal,
-                        vertical = Screen.paddingVertical
-                    )
-            ) {
-                GetUserLocation()
-                HeaderText(value = "Nearby Repair Shops")
-                NearbyShopList(data = data, navigateToRepairShopDetail = navigateToRepairShopDetail)
-                HeaderText(value = "Others")
-                OthersList(data = data, navigateToRepairShopDetail = navigateToRepairShopDetail)
-            }
+        ) {
+            GetUserLocation()
+            HeaderText(value = "Nearby Repair Shops")
+            NearbyShopList(
+                data = repairShopData,
+                navigateToRepairShopDetail = navigateToRepairShopDetail
+            )
+            HeaderText(value = "Others")
+            OthersList(
+                data = repairShopData,
+                navigateToRepairShopDetail = navigateToRepairShopDetail
+            )
         }
     }
-
-
 }
 
 @Composable
@@ -215,7 +213,7 @@ fun OthersList(
     data: List<RepairShopWithId>,
     navigateToRepairShopDetail: (repairShopId: String) -> Unit
 ) {
-    LazyColumn() {
+    LazyColumn {
         items(data, key = { it.id }) {
             RepairShopItem(
                 name = it.repairShop.name.toString(),

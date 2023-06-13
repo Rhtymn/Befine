@@ -5,11 +5,13 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.befine.R
@@ -18,16 +20,15 @@ import com.example.befine.components.ui.profile.ActionButton
 import com.example.befine.components.ui.profile.ProfileInformation
 import com.example.befine.components.ui.profile.actionButtonIconModifier
 import com.example.befine.firebase.Auth
-import com.example.befine.model.User
+import com.example.befine.model.AuthData
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.ROLE
 import com.example.befine.utils.Screen
+import com.example.befine.utils.ViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(
@@ -36,22 +37,23 @@ fun ProfileScreen(
     navigateToEditRepairShop: (userId: String) -> Unit = {},
     navController: NavHostController,
     auth: FirebaseAuth = Auth.getInstance().getAuth(),
-    db: FirebaseFirestore = Firebase.firestore
+    profileViewModel: ProfileViewModel = viewModel(factory = ViewModelFactory())
 ) {
-    var username by remember { mutableStateOf("") }
-    val email = if (auth.currentUser != null) auth.currentUser!!.email.toString() else ""
+    val context = LocalContext.current
 
+    val state: AuthData by profileViewModel.state.observeAsState(AuthData())
     LaunchedEffect(true) {
-        val user: User? =
-            db.collection("users").document(auth.currentUser!!.uid).get().await().toObject<User>()
-        if (user != null) {
-            username = user.name.toString()
+        CoroutineScope(Dispatchers.IO).launch {
+            profileViewModel.getUserPreference(context = context)
         }
     }
 
     val logoutHandler = {
         navigateToLogin()
         auth.signOut()
+        CoroutineScope(Dispatchers.IO).launch {
+            profileViewModel.deleteUserPreference(context)
+        }
     }
     Scaffold(
         topBar = {
@@ -67,7 +69,7 @@ fun ProfileScreen(
                 )
                 .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical)
         ) {
-            ProfileInformation(name = username, email = email)
+            ProfileInformation(name = state.name ?: "", email = state.email ?: "")
             Divider(modifier = Modifier.padding(vertical = 16.dp))
             if (role == ROLE.REPAIR_SHOP_OWNER) {
                 ActionButton(
@@ -83,7 +85,7 @@ fun ProfileScreen(
                 )
             }
             ActionButton(
-                onClick = logoutHandler,
+                onClick = { logoutHandler() },
                 icon = {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_logout_24),
@@ -101,7 +103,9 @@ fun ProfileScreen(
 @Composable
 fun ProfileScreenPreview() {
     BefineTheme {
-        ProfileScreen(navigateToLogin = { /*TODO*/ }, navController = rememberNavController(
-        ))
+        ProfileScreen(
+            navigateToLogin = { /*TODO*/ }, navController = rememberNavController(
+            )
+        )
     }
 }

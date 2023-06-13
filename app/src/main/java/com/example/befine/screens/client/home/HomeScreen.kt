@@ -1,6 +1,7 @@
 package com.example.befine.screens.client.home
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
@@ -9,7 +10,6 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -39,6 +39,9 @@ import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.Screen
 import com.example.befine.utils.ViewModelFactory
 import com.example.befine.utils.isRepairShopOpen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -58,10 +61,11 @@ fun GetUserLocation() {
             }
 
             @Suppress("DEPRECATION")
-            @Deprecated("Deprecated in Java", ReplaceWith(
-                "super.onStatusChanged(provider, status, extras)",
-                "android.location.LocationListener"
-            )
+            @Deprecated(
+                "Deprecated in Java", ReplaceWith(
+                    "super.onStatusChanged(provider, status, extras)",
+                    "android.location.LocationListener"
+                )
             )
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
                 super.onStatusChanged(provider, status, extras)
@@ -91,7 +95,8 @@ fun GetUserLocation() {
     }
 
     if (location != null) {
-        @Suppress("DEPRECATION") val address = geocoder.getFromLocation(location!!.latitude, location!!.longitude, 1)
+        @Suppress("DEPRECATION") val address =
+            geocoder.getFromLocation(location!!.latitude, location!!.longitude, 1)
         UserLocation(
             location = "${address?.get(0)?.thoroughfare}, ${address?.get(0)?.locality}",
             modifier = Modifier.padding(bottom = 8.dp)
@@ -104,6 +109,7 @@ fun GetUserLocation() {
     }
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -112,6 +118,12 @@ fun HomeScreen(
     navigateToRepairShopDetail: (repairShopId: String) -> Unit,
     homeViewModel: HomeViewModel = viewModel(factory = ViewModelFactory(Injection.provideRepairShopRepository())),
 ) {
+    val context = LocalContext.current
+    LaunchedEffect(true) {
+        CoroutineScope(Dispatchers.IO).launch {
+            homeViewModel.setUserPreferences(context)
+        }
+    }
     val repairShopData: List<RepairShopWithId> by homeViewModel.repairShopData.observeAsState(
         listOf()
     )

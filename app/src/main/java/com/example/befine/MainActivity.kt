@@ -26,7 +26,7 @@ import com.example.befine.screens.client.home.HomeScreen
 import com.example.befine.screens.client.details.RepairShopDetailsScreen
 import com.example.befine.screens.profile.ProfileScreen
 import com.example.befine.screens.repairshopowners.EditRepairShopScreen
-import com.example.befine.screens.repairshopowners.RepairShopHome
+import com.example.befine.screens.repairshopowners.home.RepairShopHome
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.ROLE
 import com.squareup.moshi.Moshi

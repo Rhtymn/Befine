@@ -10,10 +10,11 @@ import com.example.befine.screens.login.LoginViewModel
 import com.example.befine.screens.profile.ProfileViewModel
 import com.example.befine.screens.register.regular.SignUpViewModel
 import com.example.befine.screens.register.repairshop.RepairShopSignUpViewModel
+import com.example.befine.screens.repairshopowners.home.RepairShopHomeViewModel
 
 class ViewModelFactory(
     private val repository: RepairShopRepository? = null,
-    private val usersRepository: UsersRepository? = null
+    private val usersRepository: UsersRepository? = null,
 ) :
     ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
@@ -26,10 +27,12 @@ class ViewModelFactory(
             return ChannelViewModel() as T
         } else if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
             return LoginViewModel() as T
-        } else if(modelClass.isAssignableFrom(SignUpViewModel::class.java)) {
+        } else if (modelClass.isAssignableFrom(SignUpViewModel::class.java)) {
             return usersRepository?.let { SignUpViewModel(it) } as T
-        } else if(modelClass.isAssignableFrom(RepairShopSignUpViewModel::class.java)) {
+        } else if (modelClass.isAssignableFrom(RepairShopSignUpViewModel::class.java)) {
             return RepairShopSignUpViewModel() as T
+        } else if (modelClass.isAssignableFrom(RepairShopHomeViewModel::class.java)) {
+            return RepairShopHomeViewModel() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class " + modelClass.name)
     }

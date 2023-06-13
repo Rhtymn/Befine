@@ -10,6 +10,7 @@ import com.example.befine.screens.login.LoginViewModel
 import com.example.befine.screens.profile.ProfileViewModel
 import com.example.befine.screens.register.regular.SignUpViewModel
 import com.example.befine.screens.register.repairshop.RepairShopSignUpViewModel
+import com.example.befine.screens.repairshopowners.edit.EditRepairShopViewModel
 import com.example.befine.screens.repairshopowners.home.RepairShopHomeViewModel
 
 class ViewModelFactory(
@@ -33,6 +34,8 @@ class ViewModelFactory(
             return RepairShopSignUpViewModel() as T
         } else if (modelClass.isAssignableFrom(RepairShopHomeViewModel::class.java)) {
             return RepairShopHomeViewModel() as T
+        } else if (modelClass.isAssignableFrom(EditRepairShopViewModel::class.java)) {
+            return EditRepairShopViewModel() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class " + modelClass.name)
     }

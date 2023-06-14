@@ -1,6 +1,7 @@
 package com.example.befine.components.ui.chat
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,11 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MessageInput() {
+fun MessageInput(value: String, onValueChange: (String) -> Unit, onSend: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         TextField(
-            value = "",
-            onValueChange = {},
+            value = value,
+            onValueChange = onValueChange,
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 10.dp),
@@ -37,7 +38,8 @@ fun MessageInput() {
             Modifier
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(color = MaterialTheme.colorScheme.primary),
+                .background(color = MaterialTheme.colorScheme.primary)
+                .clickable { onSend() },
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +31,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.befine.R
 import com.example.befine.components.ui.RepairShopName
 import com.example.befine.firebase.Auth
+import com.example.befine.model.AuthData
 import com.example.befine.screens.chat.room.ChatRoomState
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
@@ -38,6 +40,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -77,8 +80,12 @@ fun RepairShopDetailsScreen(
     navController: NavHostController,
     repairShopDetailsViewModel: RepairShopDetailsViewModel = viewModel(factory = ViewModelFactory())
 ) {
+    val context = LocalContext.current
     val state: RepairShopDetailsState by repairShopDetailsViewModel.state.observeAsState(
         RepairShopDetailsState()
+    )
+    val userPreference: AuthData by repairShopDetailsViewModel.userPreference.observeAsState(
+        AuthData()
     )
     val cameraPositionState = rememberCameraPositionState {
         position =
@@ -87,6 +94,9 @@ fun RepairShopDetailsScreen(
 
     LaunchedEffect(true) {
         repairShopDetailsViewModel.getInitialData(repairShopId)
+        CoroutineScope(Dispatchers.IO).launch {
+            repairShopDetailsViewModel.getUserPreference(context)
+        }
     }
 
     val closedHourThisDay =
@@ -156,10 +166,12 @@ fun RepairShopDetailsScreen(
                 Button(
                     onClick = {
                         val chatRoomState = ChatRoomState(
-                            name = state.repairShop?.name.toString(),
-                            photo = state.repairShop?.photo.toString(),
-                            receiverId = repairShopId,
-                            senderId = auth.currentUser?.uid!!
+                            repairShopName = state.repairShop?.name.toString(),
+                            repairShopPhoto = state.repairShop?.photo.toString(),
+                            repairShopId = repairShopId,
+                            userId = auth.currentUser?.uid!!,
+                            userName = userPreference.name,
+                            senderRole = ROLE.CLIENT
                         )
                         navigateToChatRoom(chatRoomState)
                     },

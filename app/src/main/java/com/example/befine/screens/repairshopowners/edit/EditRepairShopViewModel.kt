@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,11 +17,9 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageMetadata
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.tasks.await
 import java.io.File
-import java.io.FileInputStream
 
 class EditRepairShopViewModel : ViewModel() {
     private val db: FirebaseFirestore = Firebase.firestore
@@ -40,14 +37,9 @@ class EditRepairShopViewModel : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
 
     private val _isUserUploadFile = MutableLiveData(false)
-    val isUserUploadFile: LiveData<Boolean> = _isUserUploadFile
 
     private val _capturedImageUri = MutableLiveData(Uri.EMPTY)
     val capturedImageUri: LiveData<Uri> = _capturedImageUri
-
-    fun resetFormState() {
-        _fieldState.value = _fieldState.value?.copy(isFailed = false, formErrorMsg = "")
-    }
 
     fun resetInputField() {
         _fieldState.value = _fieldState.value?.copy(
@@ -152,7 +144,7 @@ class EditRepairShopViewModel : ViewModel() {
             longitude = longitude
         )
 
-        var selectedDay = mutableMapOf<String, Boolean>()
+        val selectedDay = mutableMapOf<String, Boolean>()
         for (i in 0..6) {
             selectedDay[days[i]] =
                 if (repairShop.schedule?.get(i)?.status.isNullOrBlank()) false else repairShop.schedule?.get(

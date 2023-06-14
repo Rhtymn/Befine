@@ -32,7 +32,6 @@ import com.example.befine.firebase.Storage
 import com.example.befine.utils.ViewModelFactory
 import com.google.firebase.storage.FirebaseStorage
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatRoom(
@@ -42,8 +41,9 @@ fun ChatRoom(
     chatRoomViewModel: ChatRoomViewModel = viewModel(factory = ViewModelFactory())
 ) {
     val state: ChatRoomState by chatRoomViewModel.state.observeAsState(ChatRoomState())
+    val message: String by chatRoomViewModel.message.observeAsState("")
     var imageUri by remember { mutableStateOf(Uri.EMPTY) }
-    val imageRef = storage.reference.child("images/${chatRoomState.photo}")
+    val imageRef = storage.reference.child("images/${chatRoomState.repairShopPhoto}")
 
     LaunchedEffect(true) {
         chatRoomViewModel.setChatRoomState(chatRoomState)
@@ -69,7 +69,7 @@ fun ChatRoom(
                         contentScale = ContentScale.Crop
                     )
                     Text(
-                        text = chatRoomState.name ?: "",
+                        text = chatRoomState.repairShopName ?: "",
                         modifier = Modifier
                             .padding(start = 10.dp)
                             .fillMaxWidth(),
@@ -99,7 +99,9 @@ fun ChatRoom(
             ) {
                 ChatMessage()
             }
-            MessageInput()
+            MessageInput(value = message, onValueChange = chatRoomViewModel::onChangeMessageValue) {
+                chatRoomViewModel.onSendMessage()
+            }
         }
 
     }
@@ -112,9 +114,11 @@ fun ChatRoomPreview() {
         Surface(modifier = Modifier.fillMaxSize()) {
             ChatRoom(
                 chatRoomState = ChatRoomState(
-                    name = "Bengkel Amanah",
-                    receiverId = "dsadas",
-                    senderId = "daskldjas"
+                    repairShopName = "Bengkel Amanah",
+                    repairShopId = "ihEoAEV6qWStpvVUoGHIqr4Qb3W2",
+                    userId = "k1Wd33pFZ5USQmBjSFiIxIevpk12",
+                    repairShopPhoto = "ihEoAEV6qWStpvVUoGHIqr4Qb3W2.jpg",
+                    userName = "Muhammad Hafizh Roihan"
                 ),
                 navController = rememberNavController()
             )

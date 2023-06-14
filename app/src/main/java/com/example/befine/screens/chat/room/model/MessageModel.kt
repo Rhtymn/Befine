@@ -1,10 +1,10 @@
 package com.example.befine.screens.chat.room.model
 
 data class MessageModel(
-    val channelId: String? = "",
-    val datetime: String? = "",
-    val message: String? = "",
-    val isRead: Boolean? = false,
-    val receiverID: String? = "",
-    val senderID: String? = ""
+    val channelId: String? = null,
+    val datetime: String? = null,
+    val message: String? = null,
+    val isRead: Boolean? = null,
+    val receiverID: String? = null,
+    val senderID: String? = null
 )

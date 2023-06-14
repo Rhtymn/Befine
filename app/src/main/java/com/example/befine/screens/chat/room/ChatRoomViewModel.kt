@@ -1,23 +1,20 @@
 package com.example.befine.screens.chat.room
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.befine.preferences.PreferenceDatastore.Companion.userId
 import com.example.befine.screens.chat.room.model.ChatChannelModel
 import com.example.befine.screens.chat.room.model.ClientModel
 import com.example.befine.screens.chat.room.model.MessageModel
 import com.example.befine.screens.chat.room.model.RepairShopModel
 import com.example.befine.utils.ROLE
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.tasks.await
+import com.google.firebase.database.*
+import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.*
 
 class ChatRoomViewModel : ViewModel() {
@@ -27,7 +24,82 @@ class ChatRoomViewModel : ViewModel() {
     val state: LiveData<ChatRoomState> = _state
 
     private val _message = MutableLiveData("")
-    val message: LiveData<String> = _message
+    val snapshot: LiveData<String> = _message
+
+    private var _messagesList = mutableStateListOf<MessageModel>()
+    val messagesList: SnapshotStateList<MessageModel> = _messagesList
+
+    fun addMessage(newMessage: MessageModel) {
+        _messagesList.add(newMessage)
+    }
+
+    fun newMessageListener(channelID: String) {
+        database.child("Messages").child(channelID)
+            .addChildEventListener(object : ChildEventListener {
+                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                    val channelId = snapshot.child("channelId").value
+                    val datetime = snapshot.child("datetime").value
+                    val messageItm = snapshot.child("message").value
+                    val read = snapshot.child("read").value.toString() == "true"
+                    val receiverID = snapshot.child("receiverID").value
+                    val senderID = snapshot.child("senderID").value
+                    val messageItem = MessageModel(
+                        channelId = channelId.toString(),
+                        datetime = datetime.toString(),
+                        message = messageItm.toString(),
+                        isRead = read,
+                        receiverID = receiverID.toString(),
+                        senderID = senderID.toString()
+                    )
+                    if (!_messagesList.isEmpty()) {
+                        addMessage(messageItem)
+                        Log.d(TAG, messageItem.toString())
+                    }
+                }
+
+                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onChildRemoved(snapshot: DataSnapshot) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    TODO("Not yet implemented")
+                }
+
+            })
+    }
+
+    fun getAllMessages(channelID: String) {
+        runBlocking {
+            database.child("Messages").child(channelID).get()
+                .addOnSuccessListener { messages ->
+                    for (message in messages.children) {
+                        val channelId = message.child("channelId").value
+                        val datetime = message.child("datetime").value
+                        val messageItm = message.child("message").value
+                        val read = message.child("read").value.toString() == "true"
+                        val receiverID = message.child("receiverID").value
+                        val senderID = message.child("senderID").value
+                        val messageItem = MessageModel(
+                            channelId = channelId.toString(),
+                            datetime = datetime.toString(),
+                            message = messageItm.toString(),
+                            isRead = read,
+                            receiverID = receiverID.toString(),
+                            senderID = senderID.toString()
+                        )
+                        _messagesList.add(messageItem)
+                    }
+                }
+        }
+    }
 
     fun onChangeMessageValue(value: String) {
         _message.value = value
@@ -35,13 +107,14 @@ class ChatRoomViewModel : ViewModel() {
 
     @SuppressLint("SimpleDateFormat")
     fun onSendMessage() {
-        if (message.value == "") return
+        if (snapshot.value == "") return
         val client = ClientModel(id = state.value?.userId, name = state.value?.userName)
         val repairShop = RepairShopModel(
             id = state.value?.repairShopId,
             name = state.value?.repairShopName,
             photo = state.value?.repairShopPhoto
         )
+
         val lastSenderId =
             if (state.value?.senderRole == ROLE.CLIENT) state.value?.userId else state.value?.repairShopId
         val receiverId =
@@ -49,7 +122,7 @@ class ChatRoomViewModel : ViewModel() {
 
         val chatChannel = ChatChannelModel(
             client = client,
-            lastMessage = message.value.toString(),
+            lastMessage = snapshot.value.toString(),
             lastSenderId = lastSenderId,
             repairShop = repairShop
         )
@@ -71,7 +144,8 @@ class ChatRoomViewModel : ViewModel() {
             senderID = lastSenderId,
             datetime = dateTime
         )
-        database.child("Messages").child(UUID.randomUUID().toString()).setValue(messageItem)
+        database.child("Messages").child(channelID).push()
+            .setValue(messageItem)
             .addOnFailureListener {
                 Log.d(TAG, it.message.toString())
             }

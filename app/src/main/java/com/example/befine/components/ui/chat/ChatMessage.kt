@@ -17,10 +17,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ChatMessage(modifier: Modifier = Modifier) {
+fun ChatMessage(modifier: Modifier = Modifier, value: String) {
     Column(
         modifier = modifier
             .widthIn(min = 50.dp, max = 280.dp)
+            .padding(bottom = 8.dp)
             .clip(
                 RoundedCornerShape(8.dp)
             )
@@ -28,7 +29,7 @@ fun ChatMessage(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "Hi",
+            text = value,
             modifier = Modifier
                 .padding(horizontal = 6.dp)
                 .padding(top = 2.dp)

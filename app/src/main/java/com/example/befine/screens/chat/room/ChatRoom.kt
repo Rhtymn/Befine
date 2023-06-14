@@ -1,6 +1,7 @@
 package com.example.befine.screens.chat.room
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -26,11 +27,13 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.Screen
 import com.example.befine.R
-import com.example.befine.components.ui.chat.ChatMessage
 import com.example.befine.components.ui.chat.MessageInput
 import com.example.befine.firebase.Storage
+import com.example.befine.utils.ROLE
 import com.example.befine.utils.ViewModelFactory
 import com.google.firebase.storage.FirebaseStorage
+import com.example.befine.components.ui.chat.ChatList
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,28 +43,41 @@ fun ChatRoom(
     navController: NavHostController,
     chatRoomViewModel: ChatRoomViewModel = viewModel(factory = ViewModelFactory())
 ) {
-    val state: ChatRoomState by chatRoomViewModel.state.observeAsState(ChatRoomState())
-    val message: String by chatRoomViewModel.message.observeAsState("")
+    val messageList = chatRoomViewModel.messagesList.toList()
+    val message: String by chatRoomViewModel.snapshot.observeAsState("")
     var imageUri by remember { mutableStateOf(Uri.EMPTY) }
     val imageRef = storage.reference.child("images/${chatRoomState.repairShopPhoto}")
+    val senderId =
+        if (chatRoomState.senderRole == ROLE.CLIENT) chatRoomState.userId else chatRoomState.repairShopId
+
+    val channelId = "${chatRoomState.userId}_${chatRoomState.repairShopId}"
+    val receiverName =
+        if (chatRoomState.senderRole == ROLE.CLIENT) chatRoomState.repairShopName else chatRoomState.userName
+
+    Log.d("CHAT_ROOM", messageList.toString())
 
     LaunchedEffect(true) {
+        chatRoomViewModel.getAllMessages(channelID = channelId)
         chatRoomViewModel.setChatRoomState(chatRoomState)
-        imageRef.downloadUrl.addOnSuccessListener { uri ->
-            imageUri = uri
+        chatRoomViewModel.newMessageListener(channelId)
+        if (chatRoomState.senderRole == ROLE.CLIENT) {
+            imageRef.downloadUrl.addOnSuccessListener { uri ->
+                imageUri = uri
+            }
         }
     }
+
 
     Scaffold(topBar = {
         TopAppBar(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
-                        painter = rememberAsyncImagePainter(
+                        painter = if (chatRoomState.senderRole == ROLE.CLIENT) rememberAsyncImagePainter(
                             model = imageUri, placeholder = painterResource(
                                 id = R.drawable.default_image
                             )
-                        ),
+                        ) else painterResource(id = R.drawable.default_image),
                         contentDescription = "",
                         modifier = Modifier
                             .size(35.dp)
@@ -69,7 +85,7 @@ fun ChatRoom(
                         contentScale = ContentScale.Crop
                     )
                     Text(
-                        text = chatRoomState.repairShopName ?: "",
+                        text = receiverName ?: "",
                         modifier = Modifier
                             .padding(start = 10.dp)
                             .fillMaxWidth(),
@@ -92,12 +108,22 @@ fun ChatRoom(
                 .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(
-                Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                ChatMessage()
+            if (messageList.isEmpty()) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                ChatList(
+                    Modifier.weight(1f),
+                    messageList = messageList,
+                    senderId = senderId.toString()
+                )
             }
             MessageInput(value = message, onValueChange = chatRoomViewModel::onChangeMessageValue) {
                 chatRoomViewModel.onSendMessage()
@@ -118,7 +144,8 @@ fun ChatRoomPreview() {
                     repairShopId = "ihEoAEV6qWStpvVUoGHIqr4Qb3W2",
                     userId = "k1Wd33pFZ5USQmBjSFiIxIevpk12",
                     repairShopPhoto = "ihEoAEV6qWStpvVUoGHIqr4Qb3W2.jpg",
-                    userName = "Muhammad Hafizh Roihan"
+                    userName = "Muhammad Hafizh Roihan",
+                    senderRole = ROLE.CLIENT
                 ),
                 navController = rememberNavController()
             )

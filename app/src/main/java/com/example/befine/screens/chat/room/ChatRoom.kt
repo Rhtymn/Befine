@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,7 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
@@ -28,7 +29,7 @@ import com.example.befine.R
 import com.example.befine.components.ui.chat.ChatMessage
 import com.example.befine.components.ui.chat.MessageInput
 import com.example.befine.firebase.Storage
-import com.example.befine.model.ChatRoomState
+import com.example.befine.utils.ViewModelFactory
 import com.google.firebase.storage.FirebaseStorage
 
 
@@ -37,13 +38,15 @@ import com.google.firebase.storage.FirebaseStorage
 fun ChatRoom(
     chatRoomState: ChatRoomState,
     storage: FirebaseStorage = Storage.getInstance().getStorage(),
-    navController: NavHostController
+    navController: NavHostController,
+    chatRoomViewModel: ChatRoomViewModel = viewModel(factory = ViewModelFactory())
 ) {
-
+    val state: ChatRoomState by chatRoomViewModel.state.observeAsState(ChatRoomState())
     var imageUri by remember { mutableStateOf(Uri.EMPTY) }
     val imageRef = storage.reference.child("images/${chatRoomState.photo}")
 
     LaunchedEffect(true) {
+        chatRoomViewModel.setChatRoomState(chatRoomState)
         imageRef.downloadUrl.addOnSuccessListener { uri ->
             imageUri = uri
         }
@@ -66,7 +69,7 @@ fun ChatRoom(
                         contentScale = ContentScale.Crop
                     )
                     Text(
-                        text = chatRoomState.name,
+                        text = chatRoomState.name ?: "",
                         modifier = Modifier
                             .padding(start = 10.dp)
                             .fillMaxWidth(),

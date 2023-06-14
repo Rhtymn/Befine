@@ -1,6 +1,5 @@
 package com.example.befine.screens.client.details
 
-import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,6 +11,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,31 +23,22 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.befine.R
 import com.example.befine.components.ui.RepairShopName
 import com.example.befine.firebase.Auth
-import com.example.befine.firebase.Storage
-import com.example.befine.model.ChatRoomState
-import com.example.befine.model.RepairShop
-import com.example.befine.preferences.PreferenceDatastore.Companion.userId
+import com.example.befine.screens.chat.room.ChatRoomState
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.FirebaseStorage
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @Composable
 fun SubText(text: String) {
@@ -80,47 +71,32 @@ fun Schedule(day: String, time: String) {
 fun RepairShopDetailsScreen(
     scope: CoroutineScope = rememberCoroutineScope(),
     scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState(),
-    db: FirebaseFirestore = Firebase.firestore,
-    storage: FirebaseStorage = Storage.getInstance().getStorage(),
     repairShopId: String = "briWG2CqTAe7SVYEf3AYN2O42tq2",
     navigateToChatRoom: (chatRoomState: ChatRoomState) -> Unit = {},
     auth: FirebaseAuth = Auth.getInstance().getAuth(),
-    navController: NavHostController
+    navController: NavHostController,
+    repairShopDetailsViewModel: RepairShopDetailsViewModel = viewModel(factory = ViewModelFactory())
 ) {
-    var location by remember { mutableStateOf(LatLng(-6.187198, 106.827342)) }
+    val state: RepairShopDetailsState by repairShopDetailsViewModel.state.observeAsState(
+        RepairShopDetailsState()
+    )
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(location, 14f)
+        position =
+            CameraPosition.fromLatLngZoom(state.location ?: LatLng(-6.187198, 106.827342), 14f)
     }
-    var repairShop by remember {
-        mutableStateOf(RepairShop())
-    }
-    var imageUri by remember { mutableStateOf(Uri.EMPTY) }
 
     LaunchedEffect(true) {
-        // Get repair shop data
-        repairShop =
-            db.collection("repairShops").document(repairShopId).get().await()
-                .toObject<RepairShop>() ?: RepairShop()
-
-        // Get repair shop image
-        val imageRef = storage.reference.child("images/${repairShop.photo}")
-        imageRef.downloadUrl.addOnSuccessListener { uri ->
-            imageUri = uri
-        }
-
-        // Update location
-        location = LatLng(repairShop.latitude?.toDouble()!!, repairShop.longitude?.toDouble()!!)
-        cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 14f)
+        repairShopDetailsViewModel.getInitialData(repairShopId)
     }
 
     val closedHourThisDay =
-        if (repairShop.schedule?.isNotEmpty() == true && repairShop.schedule!![getDay()].status == STATUS.OPEN) {
-            repairShop.schedule?.get(getDay())?.operationalHours.toString().slice(6..10)
+        if (state.repairShop?.schedule?.isNotEmpty() == true && state.repairShop!!.schedule!![getDay()].status == STATUS.OPEN) {
+            state.repairShop?.schedule?.get(getDay())?.operationalHours.toString().slice(6..10)
         } else {
             ""
         }
     val thisDaySchedule =
-        if (repairShop.schedule?.let { isRepairShopOpen(it) } == STATUS.OPEN) "Open — Closed at $closedHourThisDay" else "Closed"
+        if (state.repairShop?.schedule?.let { isRepairShopOpen(it) } == STATUS.OPEN) "Open — Closed at $closedHourThisDay" else "Closed"
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -136,8 +112,8 @@ fun RepairShopDetailsScreen(
                     .verticalScroll(rememberScrollState())
             ) {
                 Image(
-                    painter = if (imageUri.path?.isNotEmpty() == true) rememberAsyncImagePainter(
-                        model = imageUri, placeholder = painterResource(
+                    painter = if (state.imageUri?.path?.isNotEmpty() == true) rememberAsyncImagePainter(
+                        model = state.imageUri, placeholder = painterResource(
                             id = R.drawable.default_image
                         )
                     ) else painterResource(id = R.drawable.default_image),
@@ -146,12 +122,12 @@ fun RepairShopDetailsScreen(
                     contentDescription = ""
                 )
                 RepairShopName(
-                    name = repairShop.name.toString(),
+                    name = state.repairShop?.name.toString(),
                     fontSize = 20.sp,
                     modifier = Modifier.padding(vertical = 6.dp)
                 )
-                SubText(text = repairShop.description.toString())
-                SubText(text = repairShop.address.toString())
+                SubText(text = state.repairShop?.description.toString())
+                SubText(text = state.repairShop?.address.toString())
                 SubText(text = thisDaySchedule)
                 SubText(text = "1.1km - 5 mnt")
                 Divider(modifier = Modifier.padding(vertical = 10.dp))
@@ -166,7 +142,7 @@ fun RepairShopDetailsScreen(
                             .weight(1f)
                             .padding(start = 16.dp)
                     ) {
-                        repairShop.schedule?.forEach { data ->
+                        state.repairShop?.schedule?.forEach { data ->
                             val time =
                                 if (data.operationalHours.isNullOrBlank()) "closed" else data.operationalHours.toString()
                             Schedule(
@@ -179,14 +155,13 @@ fun RepairShopDetailsScreen(
                 Divider(modifier = Modifier.padding(vertical = 10.dp))
                 Button(
                     onClick = {
-                        navigateToChatRoom(
-                            ChatRoomState(
-                                name = repairShop.name.toString(),
-                                photo = repairShop.photo.toString(),
-                                receiverId = repairShopId,
-                                senderId = auth.currentUser?.uid!!
-                            )
+                        val chatRoomState = ChatRoomState(
+                            name = state.repairShop?.name.toString(),
+                            photo = state.repairShop?.photo.toString(),
+                            receiverId = repairShopId,
+                            senderId = auth.currentUser?.uid!!
                         )
+                        navigateToChatRoom(chatRoomState)
                     },
                     modifier = Modifier.padding(top = 6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -227,9 +202,9 @@ fun RepairShopDetailsScreen(
                 cameraPositionState = cameraPositionState,
                 onMapClick = { scope.launch { scaffoldState.bottomSheetState.partialExpand() } },
             ) {
-                if (location.latitude != -6.187198 && location.longitude != 106.827342) {
+                if (state.location?.latitude != -6.187198 && state.location?.longitude != 106.827342) {
                     Marker(
-                        state = MarkerState(position = location),
+                        state = MarkerState(position = state.location!!),
                         title = "Singapore",
                         snippet = "Marker in Singapore"
                     )

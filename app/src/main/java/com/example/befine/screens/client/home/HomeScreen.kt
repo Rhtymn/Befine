@@ -52,6 +52,7 @@ fun GetUserLocation() {
     val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
     val isLocationEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     var location by remember { mutableStateOf<Location?>(null) }
+    var address by remember { mutableStateOf("") }
     val geocoder = Geocoder(context)
 
     DisposableEffect(Unit) {
@@ -95,18 +96,13 @@ fun GetUserLocation() {
     }
 
     if (location != null) {
-        @Suppress("DEPRECATION") val address =
-            geocoder.getFromLocation(location!!.latitude, location!!.longitude, 1)
-        UserLocation(
-            location = "${address?.get(0)?.thoroughfare}, ${address?.get(0)?.locality}",
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-    } else {
-        UserLocation(
-            location = "User Location",
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        val temp = geocoder.getFromLocation(location!!.latitude, location!!.longitude, 1)
+        address = "${temp?.get(0)?.thoroughfare}, ${temp?.get(0)?.locality}"
     }
+    UserLocation(
+        location = if (address.isNotEmpty()) address else "User location",
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")

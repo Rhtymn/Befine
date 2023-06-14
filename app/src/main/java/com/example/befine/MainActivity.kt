@@ -17,7 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.befine.model.ChatRoomState
+import com.example.befine.screens.chat.room.ChatRoomState
 import com.example.befine.navigation.Screen
 import com.example.befine.screens.login.LoginScreen
 import com.example.befine.screens.register.repairshop.RepairShopSignUpScreen

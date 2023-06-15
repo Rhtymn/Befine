@@ -37,12 +37,12 @@ fun Status(status: String, modifier: Modifier = Modifier) {
     )
     Row(
         modifier = modifier
+            .clip(RoundedCornerShape(4.dp))
             .background(backgroundColor)
             .padding(horizontal = 4.dp, vertical = 2.dp)
             .border(
                 border = BorderStroke(0.dp, backgroundColor)
-            )
-            .clip(RoundedCornerShape(8.dp)),
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

@@ -46,9 +46,10 @@ fun NearbyRepairShopItem(
     Card(
         Modifier
             .width(150.dp)
+            .height(220.dp)
             .padding(end = 16.dp)
             .clickable { onClick() },
-        shape = Shapes.small,
+        shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
@@ -100,6 +101,10 @@ fun NearbyRepairShopItemPreview() {
         modifier = Modifier.fillMaxSize(),
         color = Color.White
     ) {
-        NearbyRepairShopItem(name = "Bengkel Amanah", distance = "0.7 km", status = STATUS.OPEN, onClick = {})
+        NearbyRepairShopItem(
+            name = "Bengkel Amanah",
+            distance = "0.7 km",
+            status = STATUS.OPEN,
+            onClick = {})
     }
 }

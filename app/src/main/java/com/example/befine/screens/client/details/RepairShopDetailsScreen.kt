@@ -87,9 +87,11 @@ fun RepairShopDetailsScreen(
     val userPreference: AuthData by repairShopDetailsViewModel.userPreference.observeAsState(
         AuthData()
     )
-    val cameraPositionState = rememberCameraPositionState {
-        position =
-            CameraPosition.fromLatLngZoom(state.location ?: LatLng(-6.187198, 106.827342), 14f)
+
+    val cameraPositionState = rememberCameraPositionState()
+
+    if (state.location != null) {
+        cameraPositionState.position = CameraPosition.fromLatLngZoom(state.location!!, 14f)
     }
 
     LaunchedEffect(true) {
@@ -214,9 +216,9 @@ fun RepairShopDetailsScreen(
                 cameraPositionState = cameraPositionState,
                 onMapClick = { scope.launch { scaffoldState.bottomSheetState.partialExpand() } },
             ) {
-                if (state.location?.latitude != -6.187198 && state.location?.longitude != 106.827342) {
+                if (state.location != null) {
                     Marker(
-                        state = MarkerState(position = state.location!!),
+                        state = MarkerState(position = LatLng(state.location!!.latitude, state.location!!.longitude)),
                         title = "Singapore",
                         snippet = "Marker in Singapore"
                     )

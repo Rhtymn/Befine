@@ -19,6 +19,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.befine.R
 import com.example.befine.firebase.Storage
 import com.example.befine.utils.ROLE
+import com.example.befine.utils.Screen
 import com.google.firebase.storage.FirebaseStorage
 
 @Composable
@@ -61,7 +62,7 @@ fun ProfileInformation(
             imageUri = uri
         }
 
-    Row() {
+    Row(Modifier.padding(horizontal = Screen.paddingHorizontal)) {
         Image(
             painter = if (role == ROLE.REPAIR_SHOP_OWNER && imageUri != Uri.EMPTY) rememberAsyncImagePainter(
                 model = imageUri, placeholder = painterResource(id = R.drawable.user)

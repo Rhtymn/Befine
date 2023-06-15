@@ -67,7 +67,7 @@ fun ProfileScreen(
                 .padding(
                     innerPadding
                 )
-                .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical)
+                .padding(vertical = Screen.paddingVertical)
         ) {
             ProfileInformation(
                 name = state.name ?: "",

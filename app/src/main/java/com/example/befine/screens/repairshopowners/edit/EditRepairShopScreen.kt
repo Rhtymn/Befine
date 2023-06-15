@@ -257,7 +257,9 @@ fun EditRepairShopScreen(
                 icon = { Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "") },
             ) {
                 val locationPickerIntent =
-                    LocationPickerActivity.Builder().build(context as Activity)
+                    LocationPickerActivity.Builder()
+                        .withGooglePlacesApiKey("AIzaSyBSwanfuf-RLoHng0i8k3-QvLIVkmXNWhQ")
+                        .build(context as Activity)
                 locationPickerLauncher.launch(Intent(locationPickerIntent))
             }
             Row(

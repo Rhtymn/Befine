@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.befine.utils.Screen
 
 val actionButtonIconModifier = Modifier
     .width(36.dp)
@@ -23,6 +24,7 @@ fun ActionButton(icon: @Composable (() -> Unit), text: String, onClick: () -> Un
         modifier = Modifier
             .height(70.dp)
             .clickable { onClick() }
+            .padding(horizontal = Screen.paddingHorizontal)
     ) {
         icon()
         Text(

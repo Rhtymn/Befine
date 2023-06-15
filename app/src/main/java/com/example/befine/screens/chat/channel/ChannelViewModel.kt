@@ -26,6 +26,13 @@ class ChannelViewModel() : ViewModel() {
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _searchValue = MutableLiveData("")
+    val searchValue: LiveData<String> = _searchValue
+
+    fun onChangeSearchValue(value: String) {
+        _searchValue.value = value
+    }
+
     private fun isChannelListContains(chatChannelModel: ChatChannelModel): Boolean {
         return _channelList.any {
             it.client == chatChannelModel.client && it.repairShop == chatChannelModel.repairShop

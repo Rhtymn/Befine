@@ -1,30 +1,19 @@
 package com.example.befine.screens.chat.channel
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.befine.components.ui.chat.ChannelList
 import com.example.befine.components.ui.chat.ChannelListContent
 import com.example.befine.components.ui.chat.ChannelScreenScaffold
-import com.example.befine.components.ui.chat.ChatBox
-import com.example.befine.screens.chat.room.ChatRoomState
 import com.example.befine.screens.chat.room.model.ChatChannelModel
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
@@ -41,17 +30,31 @@ fun ChannelScreen(
 ) {
     val channelList = channelViewModel.channelList.toList()
     val isLoading: Boolean by channelViewModel.isLoading.observeAsState(false)
+    val searchValue: String by channelViewModel.searchValue.observeAsState("")
 
     LaunchedEffect(true) {
         channelViewModel.getAllChannelList(role)
         channelViewModel.channelListener(role)
     }
 
-    Log.d("CHANNEL_SCREEN", channelList.toString())
+    var filteredChannelList: List<ChatChannelModel> = listOf()
+    if (searchValue != "" && channelList.isNotEmpty()) {
+        filteredChannelList = channelList.filter {
+            if (role == ROLE.CLIENT) {
+                searchValue in it.repairShop?.name.toString().lowercase(Locale.ROOT)
+            } else {
+                searchValue in it.client?.name.toString().lowercase(Locale.ROOT)
+            }
+        }
+    }
     if (role == ROLE.CLIENT) {
-        ChannelScreenScaffold(navController = navController) {
+        ChannelScreenScaffold(
+            navController = navController,
+            searchValue = searchValue,
+            onChangeSearchValue = channelViewModel::onChangeSearchValue
+        ) {
             ChannelListContent(
-                channelList = channelList,
+                channelList = if (searchValue != "") filteredChannelList else channelList,
                 innerPadding = it,
                 role = role,
                 navController = navController,
@@ -60,7 +63,7 @@ fun ChannelScreen(
         }
     } else {
         ChannelListContent(
-            channelList = channelList,
+            channelList = if (searchValue != "") filteredChannelList else channelList,
             innerPadding = innerPadding,
             role = role,
             navController = navController,

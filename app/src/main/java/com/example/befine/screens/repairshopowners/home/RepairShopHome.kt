@@ -16,10 +16,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.befine.screens.chat.channel.ChatList
+import com.example.befine.screens.chat.channel.ChannelList
+import com.example.befine.screens.chat.channel.ChannelScreen
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.ROLE
 import com.example.befine.utils.Screen
@@ -76,13 +76,10 @@ fun RepairShopHome(
             )
         }
     ) { innerPadding ->
-        ChatList(
-            Modifier
-                .padding(innerPadding)
-                .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical),
-            channelList = listOf(),
-            role = ROLE.REPAIR_SHOP_OWNER,
-            navController = navController
+        ChannelScreen(
+            navController = navController,
+            innerPadding = innerPadding,
+            role = ROLE.REPAIR_SHOP_OWNER
         )
     }
 }

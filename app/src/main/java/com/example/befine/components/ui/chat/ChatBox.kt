@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key.Companion.U
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.befine.R
@@ -24,6 +25,7 @@ import com.google.firebase.storage.FirebaseStorage
 
 @Composable
 fun ChatBox(
+    horizontalPadding: Dp = 0.dp,
     name: String,
     datetime: String,
     message: String,
@@ -46,7 +48,8 @@ fun ChatBox(
     Row(
         Modifier
             .height(70.dp)
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .padding(horizontal = horizontalPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -54,7 +57,7 @@ fun ChatBox(
                 model = imageUri, placeholder = painterResource(
                     id = R.drawable.default_image
                 )
-            ) else painterResource(id = R.drawable.default_image),
+            ) else painterResource(id = R.drawable.user),
             contentDescription = "",
             modifier = Modifier
                 .width(50.dp)

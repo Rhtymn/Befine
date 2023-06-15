@@ -19,18 +19,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.befine.components.ui.chat.ChatBox
-import com.example.befine.components.ui.chat.Datetime
 import com.example.befine.screens.chat.room.ChatRoomState
 import com.example.befine.screens.chat.room.model.ChatChannelModel
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.*
-import com.google.android.play.integrity.internal.c
-import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.*
 
 @Composable
-fun ChatList(
+fun ChannelList(
     modifier: Modifier = Modifier,
     channelList: List<ChatChannelModel>,
     role: String,
@@ -51,6 +47,7 @@ fun ChatList(
                 senderRole = role
             )
             ChatBox(
+                horizontalPadding = Screen.paddingHorizontal,
                 name = name!!,
                 datetime = channelChatDatetime(it.lastDatetime.toString()),
                 message = it.lastMessage.toString(),
@@ -69,20 +66,10 @@ fun ChatList(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChannelScreen(
-    modifier: Modifier = Modifier,
+fun ChannelScreenScaffold(
     navController: NavHostController,
-    channelViewModel: ChannelViewModel = viewModel(
-        factory = ViewModelFactory()
-    )
+    content: @Composable (innerPadding: PaddingValues) -> Unit = {}
 ) {
-    val channelList = channelViewModel.channelList.toList()
-    LaunchedEffect(true) {
-        channelViewModel.getAllChannelList(ROLE.CLIENT)
-        channelViewModel.channelListener(ROLE.CLIENT)
-    }
-
-    Log.d("CHANNEL_SCREEN", channelList.toString())
     Scaffold(topBar = {
         TopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
@@ -115,29 +102,71 @@ fun ChannelScreen(
             }
         )
     }) { innerPadding ->
-        if (channelList.isEmpty()) {
-            Box(
-                Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
-                CircularProgressIndicator(Modifier.align(Alignment.Center))
-            }
-        } else {
-            ChatList(
-                Modifier
-                    .padding(innerPadding)
-                    .padding(
-                        horizontal = Screen.paddingHorizontal,
-                        vertical = Screen.paddingVertical
-                    ),
-                channelList = channelList.distinct(),
-                role = ROLE.CLIENT,
+        content(innerPadding)
+    }
+}
+
+@Composable
+fun Content(
+    channelList: List<ChatChannelModel>,
+    innerPadding: PaddingValues,
+    role: String,
+    navController: NavHostController
+) {
+    if (channelList.isEmpty()) {
+        Box(
+            Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
+            CircularProgressIndicator(Modifier.align(Alignment.Center))
+        }
+    } else {
+        ChannelList(
+            Modifier
+                .padding(innerPadding),
+            channelList = channelList.distinct(),
+            role = role,
+            navController = navController
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChannelScreen(
+    innerPadding: PaddingValues = PaddingValues(0.dp),
+    navController: NavHostController,
+    channelViewModel: ChannelViewModel = viewModel(
+        factory = ViewModelFactory()
+    ),
+    role: String = ROLE.CLIENT
+) {
+    val channelList = channelViewModel.channelList.toList()
+    Log.d("CHANNEL", role)
+    LaunchedEffect(true) {
+        channelViewModel.getAllChannelList(role)
+        channelViewModel.channelListener(role)
+    }
+
+    Log.d("CHANNEL_SCREEN", channelList.toString())
+    if (role == ROLE.CLIENT) {
+        ChannelScreenScaffold(navController = navController) {
+            Content(
+                channelList = channelList,
+                innerPadding = it,
+                role = role,
                 navController = navController
             )
         }
+    } else {
+        Content(
+            channelList = channelList,
+            innerPadding = innerPadding,
+            role = role,
+            navController = navController
+        )
     }
-
 }
 
 @Preview
@@ -147,7 +176,10 @@ fun ChannelScreenPreview() {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {
-            ChannelScreen(navController = rememberNavController())
+            ChannelScreen(
+                navController = rememberNavController(),
+                innerPadding = PaddingValues(0.dp)
+            )
         }
     }
 }

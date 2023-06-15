@@ -62,6 +62,7 @@ class ChannelViewModel() : ViewModel() {
                         repairShop = repairShop,
                         lastDatetime = snapshot.child("lastDatetime").value.toString()
                     )
+                    Log.d(TAG, channelItem.toString())
                     if (!isChannelListContains(channelItem)) {
                         _channelList.add(channelItem)
                     }
@@ -105,7 +106,8 @@ class ChannelViewModel() : ViewModel() {
     }
 
     fun getAllChannelList(role: String) {
-        val roleChild = if (role == ROLE.CLIENT) ROLE.CLIENT else ROLE.REPAIR_SHOP_OWNER
+        val roleChild = if (role == ROLE.CLIENT) ROLE.CLIENT else "repairShop"
+        Log.d(TAG, roleChild.toString())
         database.child("chatChannel").orderByKey().get()
             .addOnSuccessListener { chatChannels ->
                 for (chatChannel in chatChannels.children) {

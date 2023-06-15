@@ -2,8 +2,12 @@ package com.example.befine.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.compose.ui.unit.dp
 import com.example.befine.model.Schedule
+import com.example.befine.screens.chat.room.ChatRoomState
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -78,6 +82,13 @@ fun inputFieldValidation(value: String, callbackWhenEmpty: () -> Unit) {
     if (value.isEmpty()) {
         callbackWhenEmpty()
     }
+}
+
+fun convertChatRoomStateToJSON(chatRoomState: ChatRoomState): String? {
+    val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
+    val jsonAdapter = moshi.adapter(ChatRoomState::class.java).lenient()
+
+    return jsonAdapter.toJson(chatRoomState)
 }
 
 fun isValidEmail(value: String): Boolean {
@@ -166,4 +177,74 @@ fun getDay(): Int {
 
 fun capitalize(value: String): String {
     return "${value[0].uppercaseChar()}${value.slice(1 until value.length)}"
+}
+
+fun getYesterday(): Calendar {
+    val yesterday = Calendar.getInstance()
+    yesterday.add(Calendar.DAY_OF_YEAR, -1)
+
+    yesterday.set(Calendar.HOUR_OF_DAY, 0)
+    yesterday.set(Calendar.MINUTE, 0)
+    yesterday.set(Calendar.SECOND, 0)
+    yesterday.set(Calendar.MILLISECOND, 0)
+
+    return yesterday
+}
+
+fun getThisDayAtMidnight(): Calendar {
+    val thisDay = Calendar.getInstance()
+
+    thisDay.set(Calendar.HOUR_OF_DAY, 0)
+    thisDay.set(Calendar.MINUTE, 0)
+    thisDay.set(Calendar.SECOND, 0)
+    thisDay.set(Calendar.MILLISECOND, 0)
+
+    return thisDay
+}
+
+fun convertStringToCalendar(datetime: String): Date {
+    val dateFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss 'GMT'Z yyyy")
+    return dateFormat.parse(datetime)
+}
+
+fun channelChatDatetime(datetime: String): String {
+    val yesterday = getYesterday()
+    val thisDayAtMidnight = getThisDayAtMidnight()
+    val lastMessageDatetime = Calendar.getInstance()
+    lastMessageDatetime.time = convertStringToCalendar(datetime = datetime)
+
+    Log.d("CHANNEL", yesterday.time.toString())
+    Log.d("CHANNEL", lastMessageDatetime.time.toString())
+    Log.d("CHANNEL", thisDayAtMidnight.time.toString())
+
+    return if (lastMessageDatetime.after(yesterday) && lastMessageDatetime.before(thisDayAtMidnight)) {
+        "yesterday"
+    } else if (lastMessageDatetime.after(thisDayAtMidnight)) {
+        val hour = lastMessageDatetime.get(Calendar.HOUR_OF_DAY)
+        val minute = lastMessageDatetime.get(Calendar.MINUTE)
+        val convertedHour = if (hour < 10) "0$hour" else "$hour"
+        val convertedMinute = if (minute < 10) "0$minute" else "$minute"
+        "$convertedHour:${convertedMinute}"
+    } else {
+        val month = lastMessageDatetime.get(Calendar.MONTH)
+        val day = lastMessageDatetime.get(Calendar.DAY_OF_MONTH)
+        val convertedMonth = if (month < 10) "0$month" else "$month"
+        val convertedDay = if (day < 10) "0$day" else "$day"
+
+        "$convertedDay/$convertedMonth/${
+            lastMessageDatetime.get(Calendar.YEAR).toString().slice(2..3)
+        }"
+    }
+}
+
+fun messageTime(datetime: String): String {
+    val messageDatetime = Calendar.getInstance()
+    messageDatetime.time = convertStringToCalendar(datetime)
+
+    val hour = messageDatetime.get(Calendar.HOUR_OF_DAY)
+    val minute = messageDatetime.get(Calendar.MINUTE)
+    val convertedHour = if (hour < 10) "0$hour" else "$hour"
+    val convertedMinute = if (minute < 10) "0$minute" else "$minute"
+
+    return "$convertedHour:$convertedMinute"
 }

@@ -16,8 +16,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.befine.screens.chat.channel.ChatList
 import com.example.befine.ui.theme.BefineTheme
+import com.example.befine.utils.ROLE
 import com.example.befine.utils.Screen
 import com.example.befine.utils.ViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +32,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun RepairShopHome(
     navigateToProfile: () -> Unit,
-    repairShopHomeViewModel: RepairShopHomeViewModel = viewModel(factory = ViewModelFactory())
+    repairShopHomeViewModel: RepairShopHomeViewModel = viewModel(factory = ViewModelFactory()),
+    navController: NavHostController
 ) {
     val context = LocalContext.current
     LaunchedEffect(true) {
@@ -74,7 +79,10 @@ fun RepairShopHome(
         ChatList(
             Modifier
                 .padding(innerPadding)
-                .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical)
+                .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical),
+            channelList = listOf(),
+            role = ROLE.REPAIR_SHOP_OWNER,
+            navController = navController
         )
     }
 }
@@ -84,7 +92,9 @@ fun RepairShopHome(
 fun RepairShopHomePreview() {
     BefineTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            RepairShopHome(navigateToProfile = { /*TODO*/ })
+            RepairShopHome(
+                navigateToProfile = { /*TODO*/ }, navController = rememberNavController()
+            )
         }
     }
 }

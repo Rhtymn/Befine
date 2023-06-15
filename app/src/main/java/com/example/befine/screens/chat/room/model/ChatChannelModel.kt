@@ -6,5 +6,6 @@ data class ChatChannelModel(
     val lastMessage: String? = "",
     val lastSenderId: String? = "",
     val unreadedMessage: Int? = 0,
+    val lastDatetime: String? = "",
     val repairShop: RepairShopModel? = RepairShopModel()
 )

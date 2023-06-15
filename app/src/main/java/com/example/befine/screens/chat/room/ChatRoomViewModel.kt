@@ -29,11 +29,15 @@ class ChatRoomViewModel : ViewModel() {
     private var _messagesList = mutableStateListOf<MessageModel>()
     val messagesList: SnapshotStateList<MessageModel> = _messagesList
 
+    private var _isLoading = MutableLiveData(true)
+    val isLoading: LiveData<Boolean> = _isLoading
+
     fun addMessage(newMessage: MessageModel) {
         _messagesList.add(newMessage)
     }
 
     fun newMessageListener(channelID: String) {
+        Log.d(TAG, "listen")
         database.child("Messages").child(channelID)
             .addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
@@ -51,10 +55,8 @@ class ChatRoomViewModel : ViewModel() {
                         receiverID = receiverID.toString(),
                         senderID = senderID.toString()
                     )
-                    if (!_messagesList.isEmpty()) {
-                        addMessage(messageItem)
-                        Log.d(TAG, messageItem.toString())
-                    }
+                    addMessage(messageItem)
+                    Log.d(TAG, messageItem.toString())
                 }
 
                 override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
@@ -77,6 +79,7 @@ class ChatRoomViewModel : ViewModel() {
     }
 
     fun getAllMessages(channelID: String) {
+        _isLoading.value = true
         runBlocking {
             database.child("Messages").child(channelID).get()
                 .addOnSuccessListener { messages ->
@@ -98,6 +101,7 @@ class ChatRoomViewModel : ViewModel() {
                         _messagesList.add(messageItem)
                     }
                 }
+            _isLoading.postValue(false)
         }
     }
 
@@ -108,6 +112,8 @@ class ChatRoomViewModel : ViewModel() {
     @SuppressLint("SimpleDateFormat")
     fun onSendMessage() {
         if (snapshot.value == "") return
+//        val dateTime = SimpleDateFormat().format(Date())
+        val dateTime = Calendar.getInstance().time
         val client = ClientModel(id = state.value?.userId, name = state.value?.userName)
         val repairShop = RepairShopModel(
             id = state.value?.repairShopId,
@@ -124,7 +130,8 @@ class ChatRoomViewModel : ViewModel() {
             client = client,
             lastMessage = snapshot.value.toString(),
             lastSenderId = lastSenderId,
-            repairShop = repairShop
+            repairShop = repairShop,
+            lastDatetime = dateTime.toString()
         )
 
         // Update ChatChannel
@@ -135,14 +142,13 @@ class ChatRoomViewModel : ViewModel() {
             }
 
         // Create a message
-        val dateTime = SimpleDateFormat().format(Date())
         val messageItem = MessageModel(
             channelId = channelID,
             message = _message.value.toString(),
             isRead = false,
             receiverID = receiverId,
             senderID = lastSenderId,
-            datetime = dateTime
+            datetime = dateTime.toString()
         )
         database.child("Messages").child(channelID).push()
             .setValue(messageItem)

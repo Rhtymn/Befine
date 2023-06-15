@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ChatMessage(modifier: Modifier = Modifier, value: String) {
+fun ChatMessage(modifier: Modifier = Modifier, value: String, time: String) {
     Column(
         modifier = modifier
             .widthIn(min = 50.dp, max = 280.dp)
@@ -35,7 +35,7 @@ fun ChatMessage(modifier: Modifier = Modifier, value: String) {
                 .padding(top = 2.dp)
         )
         Text(
-            text = "12.12",
+            text = time,
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(end = 6.dp, bottom = 4.dp),

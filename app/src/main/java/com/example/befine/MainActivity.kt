@@ -41,7 +41,9 @@ class MainActivity : ComponentActivity() {
             BefineTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize().background(color = Color.White),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = Color.White),
                 ) {
                     BefineApp()
                 }
@@ -128,7 +130,10 @@ fun BefineApp(
             ChannelScreen(navController = navController)
         }
         composable(Screen.RepairShopHome.route) {
-            RepairShopHome(navigateToProfile = { goToProfile(ROLE.REPAIR_SHOP_OWNER) })
+            RepairShopHome(
+                navigateToProfile = { goToProfile(ROLE.REPAIR_SHOP_OWNER) },
+                navController = navController
+            )
         }
         composable(
             Screen.EditRepairShop.route,

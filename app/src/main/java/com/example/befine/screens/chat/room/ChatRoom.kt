@@ -45,6 +45,7 @@ fun ChatRoom(
 ) {
     val messageList = chatRoomViewModel.messagesList.toList()
     val message: String by chatRoomViewModel.snapshot.observeAsState("")
+    val isLoading: Boolean by chatRoomViewModel.isLoading.observeAsState(false)
     var imageUri by remember { mutableStateOf(Uri.EMPTY) }
     val imageRef = storage.reference.child("images/${chatRoomState.repairShopPhoto}")
     val senderId =
@@ -66,6 +67,8 @@ fun ChatRoom(
             }
         }
     }
+
+    Log.d("CHAT_ROOM", isLoading.toString())
 
 
     Scaffold(topBar = {
@@ -96,7 +99,9 @@ fun ChatRoom(
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
             navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = {
+                    navController.popBackStack()
+                }) {
                     Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
                 }
             },
@@ -108,7 +113,7 @@ fun ChatRoom(
                 .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            if (messageList.isEmpty()) {
+            if (messageList.isEmpty() && isLoading) {
                 Column(
                     Modifier
                         .fillMaxWidth()
@@ -118,20 +123,20 @@ fun ChatRoom(
                 ) {
                     CircularProgressIndicator()
                 }
-            } else {
-                ChatList(
-                    Modifier.weight(1f),
-                    messageList = messageList,
-                    senderId = senderId.toString()
-                )
             }
+            ChatList(
+                Modifier.weight(1f),
+                messageList = messageList,
+                senderId = senderId.toString(),
+            )
             MessageInput(value = message, onValueChange = chatRoomViewModel::onChangeMessageValue) {
                 chatRoomViewModel.onSendMessage()
             }
         }
-
     }
+
 }
+
 
 @Preview
 @Composable

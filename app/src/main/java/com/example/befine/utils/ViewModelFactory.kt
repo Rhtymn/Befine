@@ -42,6 +42,8 @@ class ViewModelFactory(
             return ChatRoomViewModel() as T
         } else if (modelClass.isAssignableFrom(RepairShopDetailsViewModel::class.java)) {
             return RepairShopDetailsViewModel() as T
+        } else if (modelClass.isAssignableFrom(ChannelViewModel::class.java)) {
+            return ChannelViewModel() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class " + modelClass.name)
     }

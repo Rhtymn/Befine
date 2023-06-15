@@ -1,20 +1,24 @@
 package com.example.befine.components.ui.chat
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.befine.screens.chat.room.model.MessageModel
+import com.example.befine.utils.messageTime
 
 @Composable
 fun ChatList(modifier: Modifier = Modifier, messageList: List<MessageModel>, senderId: String) {
+    val scrollState = rememberScrollState()
     Column(
         modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
+            .verticalScroll(scrollState)
     ) {
 //        LazyColumn() {
 //            items(
@@ -30,12 +34,26 @@ fun ChatList(modifier: Modifier = Modifier, messageList: List<MessageModel>, sen
 //                }
 //            }
 //        }
-        messageList.forEach {
+        messageList.distinct().forEach {
             if (it.senderID == senderId) {
-                ChatMessage(value = it.message.toString(), modifier = Modifier.align(Alignment.End))
+                ChatMessage(
+                    value = it.message.toString(),
+                    modifier = Modifier.align(Alignment.End),
+                    time = messageTime(
+                        it.datetime
+                            .toString()
+                    )
+                )
             } else {
-                ChatMessage(value = it.message.toString())
+                ChatMessage(
+                    value = it.message.toString(),
+                    time = messageTime(it.datetime.toString())
+                )
             }
+        }
+
+        LaunchedEffect(scrollState) {
+            scrollState.scrollTo(scrollState.maxValue)
         }
     }
 }

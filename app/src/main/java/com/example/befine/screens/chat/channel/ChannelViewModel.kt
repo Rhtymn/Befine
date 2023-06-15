@@ -2,7 +2,10 @@ package com.example.befine.screens.chat.channel
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.befine.firebase.Auth
 import com.example.befine.screens.chat.room.model.ChatChannelModel
@@ -16,8 +19,12 @@ class ChannelViewModel() : ViewModel() {
     private var database: DatabaseReference =
         FirebaseDatabase.getInstance("https://befine-f1996-default-rtdb.asia-southeast1.firebasedatabase.app").reference
     private val auth: FirebaseAuth = Auth.getInstance().getAuth()
+
     private val _channelList = mutableStateListOf<ChatChannelModel>()
     val channelList: SnapshotStateList<ChatChannelModel> = _channelList
+
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
 
     private fun isChannelListContains(chatChannelModel: ChatChannelModel): Boolean {
         return _channelList.any {
@@ -26,7 +33,6 @@ class ChannelViewModel() : ViewModel() {
     }
 
     fun updateChannelList(chatChannelModel: ChatChannelModel) {
-        Log.d(TAG, "update")
         if (isChannelListContains(chatChannelModel)) {
             val index = _channelList.withIndex().first {
                 it.value.client == chatChannelModel.client && it.value.repairShop == chatChannelModel.repairShop
@@ -106,8 +112,8 @@ class ChannelViewModel() : ViewModel() {
     }
 
     fun getAllChannelList(role: String) {
+        _isLoading.value = true
         val roleChild = if (role == ROLE.CLIENT) ROLE.CLIENT else "repairShop"
-        Log.d(TAG, roleChild.toString())
         database.child("chatChannel").orderByKey().get()
             .addOnSuccessListener { chatChannels ->
                 for (chatChannel in chatChannels.children) {
@@ -139,6 +145,9 @@ class ChannelViewModel() : ViewModel() {
                         }
                     }
                 }
+                _isLoading.value = false
+            }.addOnFailureListener {
+                _isLoading.value = false
             }
 
     }

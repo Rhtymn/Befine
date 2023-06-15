@@ -18,11 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.befine.screens.chat.channel.ChannelList
 import com.example.befine.screens.chat.channel.ChannelScreen
 import com.example.befine.ui.theme.BefineTheme
 import com.example.befine.utils.ROLE
-import com.example.befine.utils.Screen
 import com.example.befine.utils.ViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

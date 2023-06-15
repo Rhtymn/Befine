@@ -2,9 +2,7 @@ buildscript {
     repositories {
         google()  // Google's Maven repository
         mavenCentral()  // Maven Central repository
-        maven {
-            url "https://dl.cloudsmith.io/public/cometchat/cometchat-pro-android/maven/"
-        }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
 
     ext {

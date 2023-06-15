@@ -103,6 +103,9 @@ dependencies {
     implementation "com.squareup.moshi:moshi:1.14.0"
     implementation "com.squareup.moshi:moshi-kotlin:1.14.0"
 
+    // Lottie
+    implementation "com.airbnb.android:lottie-compose:6.0.1"
+
     implementation "androidx.compose.runtime:runtime-livedata:1.0.0-beta01"
 
     implementation "androidx.datastore:datastore-preferences:1.0.0"

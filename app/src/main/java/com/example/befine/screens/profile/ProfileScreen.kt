@@ -69,7 +69,12 @@ fun ProfileScreen(
                 )
                 .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical)
         ) {
-            ProfileInformation(name = state.name ?: "", email = state.email ?: "")
+            ProfileInformation(
+                name = state.name ?: "",
+                email = state.email ?: "",
+                role = role,
+                photo = state.photo.toString()
+            )
             Divider(modifier = Modifier.padding(vertical = 16.dp))
             if (role == ROLE.REPAIR_SHOP_OWNER) {
                 ActionButton(

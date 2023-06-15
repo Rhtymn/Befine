@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.befine.firebase.Auth
 import com.example.befine.model.AuthData
+import com.example.befine.model.RepairShop
 import com.example.befine.model.User
 import com.example.befine.preferences.PreferenceDatastore
 import com.example.befine.screens.client.home.HomeViewModel
@@ -23,11 +24,16 @@ class RepairShopHomeViewModel : ViewModel() {
         val preferenceDatastore = PreferenceDatastore(context = context)
         val user =
             db.collection("users").document(auth.currentUser?.uid!!).get().await().toObject<User>()
+        val repairShopInformation =
+            db.collection("repairShops").document(auth.currentUser?.uid!!).get().await()
+                .toObject<RepairShop>()
+        Log.d("REPAIRSHOP_VIEWMODEL", repairShopInformation?.photo.toString())
         val authData =
             AuthData(
                 userId = auth.currentUser?.uid!!,
                 email = auth.currentUser?.email!!,
-                name = user?.name!!
+                name = user?.name!!,
+                photo = repairShopInformation?.photo.toString()
             )
         Log.d(HomeViewModel.TAG, authData.toString())
         preferenceDatastore.setAuthPreference(authData)

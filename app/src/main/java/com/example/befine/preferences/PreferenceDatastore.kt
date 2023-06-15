@@ -19,6 +19,7 @@ class PreferenceDatastore(context: Context) {
         var userId = stringPreferencesKey("USER_ID")
         var email = stringPreferencesKey("EMAIL")
         var name = stringPreferencesKey("NAME")
+        val photo = stringPreferencesKey("PHOTO")
     }
 
     suspend fun setAuthPreference(data: AuthData) {
@@ -26,11 +27,12 @@ class PreferenceDatastore(context: Context) {
             it[userId] = data.userId ?: ""
             it[email] = data.email ?: ""
             it[name] = data.name ?: ""
+            it[photo] = data.photo ?: ""
         }
     }
 
     fun getAuthPreference() = pref.data.map {
-        AuthData(it[userId] ?: "", it[email] ?: "", name = it[name] ?: "")
+        AuthData(it[userId] ?: "", it[email] ?: "", name = it[name] ?: "", photo = it[photo] ?: "")
     }
 
 

@@ -203,6 +203,7 @@ fun getThisDayAtMidnight(): Calendar {
 }
 
 fun convertStringToCalendar(datetime: String): Date {
+    Log.d("UTILS", datetime)
     val dateFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss 'GMT'Z yyyy")
     return dateFormat.parse(datetime)
 }
@@ -218,7 +219,7 @@ fun channelChatDatetime(datetime: String): String {
     Log.d("CHANNEL", thisDayAtMidnight.time.toString())
 
     return if (lastMessageDatetime.after(yesterday) && lastMessageDatetime.before(thisDayAtMidnight)) {
-        "yesterday"
+        "Yesterday"
     } else if (lastMessageDatetime.after(thisDayAtMidnight)) {
         val hour = lastMessageDatetime.get(Calendar.HOUR_OF_DAY)
         val minute = lastMessageDatetime.get(Calendar.MINUTE)
@@ -236,6 +237,33 @@ fun channelChatDatetime(datetime: String): String {
         }"
     }
 }
+
+fun chatRoomDatetime(datetime: String): String {
+    val yesterday = getYesterday()
+    val thisDayAtMidnight = getThisDayAtMidnight()
+    val lastMessageDatetime = Calendar.getInstance()
+    lastMessageDatetime.time = convertStringToCalendar(datetime = datetime)
+
+    Log.d("CHANNEL", yesterday.time.toString())
+    Log.d("CHANNEL", lastMessageDatetime.time.toString())
+    Log.d("CHANNEL", thisDayAtMidnight.time.toString())
+
+    return if (lastMessageDatetime.after(yesterday) && lastMessageDatetime.before(thisDayAtMidnight)) {
+        "Yesterday"
+    } else if (lastMessageDatetime.after(thisDayAtMidnight)) {
+        "Today"
+    } else {
+        val month = lastMessageDatetime.get(Calendar.MONTH)
+        val day = lastMessageDatetime.get(Calendar.DAY_OF_MONTH)
+        val convertedMonth = if (month < 10) "0$month" else "$month"
+        val convertedDay = if (day < 10) "0$day" else "$day"
+
+        "$convertedDay/$convertedMonth/${
+            lastMessageDatetime.get(Calendar.YEAR).toString().slice(2..3)
+        }"
+    }
+}
+
 
 fun messageTime(datetime: String): String {
     val messageDatetime = Calendar.getInstance()

@@ -3,17 +3,21 @@ package com.example.befine.screens.chat.room
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -80,10 +84,10 @@ fun ChatRoom(
                             model = imageUri, placeholder = painterResource(
                                 id = R.drawable.default_image
                             )
-                        ) else painterResource(id = R.drawable.default_image),
+                        ) else painterResource(id = R.drawable.user),
                         contentDescription = "",
                         modifier = Modifier
-                            .size(35.dp)
+                            .size(40.dp)
                             .clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
@@ -109,6 +113,9 @@ fun ChatRoom(
     }) { innerPadding ->
         Column(
             Modifier
+                .background(
+                    Color(247, 242, 250)
+                )
                 .padding(innerPadding)
                 .padding(horizontal = Screen.paddingHorizontal, vertical = Screen.paddingVertical),
             verticalArrangement = Arrangement.SpaceBetween
@@ -150,7 +157,7 @@ fun ChatRoomPreview() {
                     userId = "k1Wd33pFZ5USQmBjSFiIxIevpk12",
                     repairShopPhoto = "ihEoAEV6qWStpvVUoGHIqr4Qb3W2.jpg",
                     userName = "Muhammad Hafizh Roihan",
-                    senderRole = ROLE.CLIENT
+                    senderRole = ROLE.REPAIR_SHOP_OWNER
                 ),
                 navController = rememberNavController()
             )

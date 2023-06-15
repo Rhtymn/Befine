@@ -38,6 +38,7 @@ fun ProfileEmail(value: String) {
 
 @Composable
 fun ProfileInformation(name: String, email: String) {
+
     Row() {
         Image(
             painter = painterResource(id = R.drawable.wolf),

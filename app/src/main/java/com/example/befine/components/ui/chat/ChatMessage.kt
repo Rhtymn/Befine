@@ -17,7 +17,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ChatMessage(modifier: Modifier = Modifier, value: String, time: String) {
+fun ChatMessage(
+    modifier: Modifier = Modifier,
+    value: String,
+    time: String,
+    backgroundColor: Color = MaterialTheme.colorScheme.primaryContainer,
+    timeColor: Color = Color.Gray,
+    messageColor: Color = Color.Unspecified
+) {
     Column(
         modifier = modifier
             .widthIn(min = 50.dp, max = 280.dp)
@@ -25,14 +32,15 @@ fun ChatMessage(modifier: Modifier = Modifier, value: String, time: String) {
             .clip(
                 RoundedCornerShape(8.dp)
             )
-            .background(color = MaterialTheme.colorScheme.primaryContainer),
+            .background(color = backgroundColor),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = value,
             modifier = Modifier
                 .padding(horizontal = 6.dp)
-                .padding(top = 2.dp)
+                .padding(top = 2.dp),
+            color = messageColor
         )
         Text(
             text = time,
@@ -40,7 +48,7 @@ fun ChatMessage(modifier: Modifier = Modifier, value: String, time: String) {
                 .align(Alignment.End)
                 .padding(end = 6.dp, bottom = 4.dp),
             fontSize = 10.sp,
-            color = Color.Gray
+            color = timeColor
         )
     }
 }

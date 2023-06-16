@@ -1,5 +1,6 @@
-
-<img src="assets/logo.png" alt="Befine" width="200"><br>
+<h1 align="center">
+  <img src="assets/logo.png" alt="Befine" width="200"><br>
+</h1>
 
 # Befine
 
@@ -39,8 +40,29 @@ By leveraging the power of geolocation technology, BEFINE enables users to find 
 3. Run the application with your device or emulator
     
 ## Screenshots
+### Authentication
+<img src="assets/Login.png" width="150" height="300"> <img src="assets/Regular_Register.png" width="150" height="300"> <img src="assets/RepairShop_Register.png" width="150" height="300">
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+### Profile
+<img src="assets/Regular_Profile.png" width="150" height="300"> <img src="assets/repairshop_profile.png" width="150" height="300">
+
+### Client Home
+<img src="assets/regular_homescreen.png" width="150" height="300"> <img src="assets/regular_homescreen_search.png" width="150" height="300"> 
+
+### Repair Shop Details
+<img src="assets/repair_shop_details.png" width="150" height="300">
+
+### Message Channel List
+<img src="assets/regular_channel.png" width="150" height="300">
+
+### Message Chatroom
+<img src="assets/regular_chatroom.png" width="150" height="300">
+
+### Repair Shop Home
+<img src="assets/repairshop_home.png" width="150" height="300">
+
+### Repair Shop Edit
+<img src="assets/repairshop_edit.png" width="150" height="300"> <img src="assets/time_picker.png" width="150" height="300"> <img src="assets/location_picker.png" width="150" height="300">
 
 
 ## Contact

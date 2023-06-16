@@ -2,6 +2,8 @@ package com.example.befine.screens.client.home
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -27,8 +29,36 @@ class HomeViewModel(private val repository: RepairShopRepository) : ViewModel() 
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _searchValue = MutableLiveData("")
+    val searchValue: LiveData<String> = _searchValue
+
+    private val _searchedRepairShop = mutableStateListOf<RepairShopWithId>()
+    val searchedRepairShop: SnapshotStateList<RepairShopWithId> = _searchedRepairShop
+
     init {
         getAllRepairShop()
+    }
+
+    fun resetSearchValue() {
+        _searchValue.value = ""
+    }
+
+    fun resetSearchedRepairShop() {
+        _searchedRepairShop.clear()
+    }
+
+    fun onChangeSearchValue(value: String) {
+        _searchValue.value = value
+        val searchedResult = _repairShopData.value?.filter {
+            value in it.repairShop.name.toString().lowercase()
+        }
+        if (searchedResult != null) {
+            _searchedRepairShop.addAll(searchedResult)
+        }
+
+        if (value.isEmpty()) {
+            _searchedRepairShop.clear()
+        }
     }
 
     fun getAllRepairShop() {

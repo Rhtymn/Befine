@@ -10,6 +10,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,8 +22,10 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,6 +45,7 @@ import com.example.befine.utils.isRepairShopOpen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.*
 
 private const val REQUEST_LOCATION_PERMISSION = 1
 
@@ -96,11 +100,12 @@ fun GetUserLocation() {
     }
 
     if (location != null) {
-        val temp = geocoder.getFromLocation(location!!.latitude, location!!.longitude, 1)
+        @Suppress("DEPRECATION") val temp =
+            geocoder.getFromLocation(location!!.latitude, location!!.longitude, 1)
         address = "${temp?.get(0)?.thoroughfare}, ${temp?.get(0)?.locality}"
     }
     UserLocation(
-        location = if (address.isNotEmpty()) address else "User location",
+        location = address.ifEmpty { "User location" },
         modifier = Modifier.padding(bottom = 8.dp)
     )
 }
@@ -123,50 +128,107 @@ fun HomeScreen(
     val repairShopData: List<RepairShopWithId> by homeViewModel.repairShopData.observeAsState(
         listOf()
     )
-    Scaffold(
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val scope = rememberCoroutineScope()
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    var searchBarFocusState by remember {
+        mutableStateOf(false)
+    }
+    val searchValue: String by homeViewModel.searchValue.observeAsState("")
+    val searchedRepairShop = homeViewModel.searchedRepairShop.toList()
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 0.dp,
+        sheetContent = {
+            Column(
+                Modifier
+                    .height(screenHeight)
+                    .padding(horizontal = Screen.paddingHorizontal)
+            ) {
+                Row {
+                    SearchBar(
+                        query = searchValue,
+                        onQueryChange = homeViewModel::onChangeSearchValue,
+                        onSearch = {},
+                        active = false,
+                        onActiveChange = { },
+                        leadingIcon = {
+                            Icon(imageVector = Icons.Filled.Search, contentDescription = "")
+                        },
+                        modifier = Modifier.weight(1f),
+                        placeholder = { Text("Search") }
+                    ) {}
+                }
+                OthersList(
+                    data = searchedRepairShop.distinct(),
+                    navigateToRepairShopDetail = navigateToRepairShopDetail,
+                    modifier = Modifier.padding(top = 20.dp)
+                )
+            }
+        },
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ),
                 title = {
-                    SearchBar(
-                        query = "",
-                        onQueryChange = {},
-                        onSearch = {},
-                        active = false,
-                        onActiveChange = {},
-                        leadingIcon = {
-                            Icon(imageVector = Icons.Filled.Search, contentDescription = "")
-                        },
-                        placeholder = { Text("Search") }
-                    ) {
-
-                    }
                 },
                 windowInsets = WindowInsets(bottom = 8.dp),
                 navigationIcon = {
-                    IconButton(onClick = { navigateToProfile() }) {
-                        Icon(
-                            imageVector = Icons.Outlined.AccountCircle,
-                            contentDescription = "",
-                            tint = Color.Black
-                        )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { navigateToProfile() }) {
+                            Icon(
+                                imageVector = Icons.Outlined.AccountCircle,
+                                contentDescription = "",
+                                tint = Color.Black
+                            )
+                        }
+                        SearchBar(
+                            query = "",
+                            onQueryChange = {},
+                            onSearch = {},
+                            active = searchBarFocusState,
+                            onActiveChange = {
+                                searchBarFocusState = !searchBarFocusState
+                                homeViewModel.resetSearchValue()
+                                homeViewModel.resetSearchedRepairShop()
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.expand()
+                                    searchBarFocusState = !searchBarFocusState
+                                }
+                            },
+                            leadingIcon = {
+                                Icon(imageVector = Icons.Filled.Search, contentDescription = "")
+                            },
+                            modifier = Modifier.weight(1f),
+                            placeholder = { Text("Search") }
+                        ) {
+
+                        }
+                        IconButton(onClick = { navigateToChatChannel() }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Email, contentDescription = "",
+                                tint = Color.Black
+                            )
+                        }
                     }
                 },
                 actions = {
-                    IconButton(onClick = { navigateToChatChannel() }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Email, contentDescription = "",
-                            tint = Color.Black
-                        )
-                    }
+//                    IconButton(onClick = { navigateToChatChannel() }) {
+//                        Icon(
+//                            imageVector = Icons.Outlined.Email, contentDescription = "",
+//                            tint = Color.Black
+//                        )
+//                    }
                 }
             )
-        }
-    ) { innerPadding ->
+        }) { innerPadding ->
         Column(
             Modifier
+                .background(color = Color.White)
+                .fillMaxSize()
                 .padding(innerPadding)
                 .padding(
                     horizontal = Screen.paddingHorizontal,
@@ -218,10 +280,11 @@ fun NearbyShopList(
 
 @Composable
 fun OthersList(
+    modifier: Modifier = Modifier,
     data: List<RepairShopWithId>,
-    navigateToRepairShopDetail: (repairShopId: String) -> Unit
+    navigateToRepairShopDetail: (repairShopId: String) -> Unit,
 ) {
-    LazyColumn {
+    LazyColumn(modifier = modifier) {
         items(data, key = { it.id }) {
             RepairShopItem(
                 name = it.repairShop.name.toString(),
@@ -249,3 +312,68 @@ fun HomeScreenPreview() {
         }
     }
 }
+
+
+//    Scaffold(
+//        topBar = {
+//            TopAppBar(
+//                colors = TopAppBarDefaults.topAppBarColors(
+//                    containerColor = MaterialTheme.colorScheme.primaryContainer
+//                ),
+//                title = {
+//                    SearchBar(
+//                        query = "",
+//                        onQueryChange = {},
+//                        onSearch = {},
+//                        active = false,
+//                        onActiveChange = {},
+//                        leadingIcon = {
+//                            Icon(imageVector = Icons.Filled.Search, contentDescription = "")
+//                        },
+//                        placeholder = { Text("Search") }
+//                    ) {
+//
+//                    }
+//                },
+//                windowInsets = WindowInsets(bottom = 8.dp),
+//                navigationIcon = {
+//                    IconButton(onClick = { navigateToProfile() }) {
+//                        Icon(
+//                            imageVector = Icons.Outlined.AccountCircle,
+//                            contentDescription = "",
+//                            tint = Color.Black
+//                        )
+//                    }
+//                },
+//                actions = {
+//                    IconButton(onClick = { navigateToChatChannel() }) {
+//                        Icon(
+//                            imageVector = Icons.Outlined.Email, contentDescription = "",
+//                            tint = Color.Black
+//                        )
+//                    }
+//                }
+//            )
+//        }
+//    ) { innerPadding ->
+//        Column(
+//            Modifier
+//                .padding(innerPadding)
+//                .padding(
+//                    horizontal = Screen.paddingHorizontal,
+//                    vertical = Screen.paddingVertical
+//                )
+//        ) {
+//            GetUserLocation()
+//            HeaderText(value = "Nearby Repair Shops")
+//            NearbyShopList(
+//                data = repairShopData,
+//                navigateToRepairShopDetail = navigateToRepairShopDetail
+//            )
+//            HeaderText(value = "Others")
+//            OthersList(
+//                data = repairShopData,
+//                navigateToRepairShopDetail = navigateToRepairShopDetail
+//            )
+//        }
+//    }

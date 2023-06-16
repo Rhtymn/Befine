@@ -44,10 +44,11 @@ fun RepairShopItem(
     Card(
         Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp).clickable { onClick() },
+            .padding(bottom = 16.dp)
+            .clickable { onClick() },
         shape = Shapes.small,
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = Color.Unspecified
         )
     ) {
         Row(Modifier.fillMaxWidth()) {
